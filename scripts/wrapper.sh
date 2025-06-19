@@ -69,3 +69,12 @@ python scripts/find_stop_codon_free_regions_with_reverse_gap_report.py chrs/$spe
 done
 done
 #########################################################################################################################
+#get summary of all SCFRs in the genomes of the 7 primate species
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo $species
+cat SCFR/"$species"/*.fasta.SCFRs.out > SCFR_all/"$species"_SCFR_all.out
+Rscript scripts/summarize_SCFR_bed_frames_all.R SCFR_all/"$species"_SCFR_all.out
+done
+#########################################################################################################################
+
