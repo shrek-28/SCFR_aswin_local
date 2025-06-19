@@ -1,0 +1,71 @@
+#########################################################################################################################
+#Create the required folders
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo $species
+mkdir -p chrs/"$species"
+mkdir -p SCFR/"$species"
+mkdir -p SCFR/gaps/"$species"
+mkdir -p genes/"$species"
+mkdir -p GC/"$species"
+mkdir -p SCFR_all
+mkdir -p scripts
+done
+
+
+#########################################################################################################################
+##Download all the seven primate genome
+#Download the T2T-CHM13v2.0 genome
+for chr in `cut -f 9 genome_reports/GCA_009914755.4_human.tsv|grep -v "RefSeq"`
+do
+echo $chr
+esearch -db nucleotide -query "$chr" | efetch -format fasta > chrs/human/"$chr".fasta
+done
+#Download the NHGRI_mPanTro3-v2.1_pri genome
+for chr in `cut -f 9 genome_reports/GCA_028858775.3_chimpanzee.tsv|grep -v "RefSeq"`
+do
+echo $chr
+esearch -db nucleotide -query "$chr" | efetch -format fasta > chrs/chimpanzee/"$chr".fasta
+done
+#Download the NHGRI_mPanPan1-v2.1_pri genome
+for chr in `cut -f 9 genome_reports/GCA_029289425.3_bonobo.tsv|grep -v "RefSeq"`
+do
+echo $chr
+esearch -db nucleotide -query "$chr" | efetch -format fasta > chrs/bonobo/"$chr".fasta
+done
+#Download the NHGRI_mSymSyn1-v2.1_pri genome
+for chr in `cut -f 9 genome_reports/GCA_028878055.3_gibbon.tsv|grep -v "RefSeq"`
+do
+echo $chr
+esearch -db nucleotide -query "$chr" | efetch -format fasta > chrs/gibbon/"$chr".fasta
+done
+#Download the NHGRI_mGorGor1-v2.1_pri genome
+for chr in `cut -f 9 genome_reports/GCA_029281585.3_gorilla.tsv|grep -v "RefSeq"`
+do
+echo $chr
+esearch -db nucleotide -query "$chr" | efetch -format fasta > chrs/gorilla/"$chr".fasta
+done
+#Download the NHGRI_mPonPyg2-v2.1_pri genome
+for chr in `cut -f 9 genome_reports/GCA_028885625.3_Bornean_orangutan.tsv|grep -v "RefSeq"`
+do
+echo $chr
+esearch -db nucleotide -query "$chr" | efetch -format fasta > chrs/borangutan/"$chr".fasta
+done
+#Download the NHGRI_mPonAbe1-v2.1_pri genome
+for chr in `cut -f 9 genome_reports/GCA_028885655.3_sumatran_orangutan.tsv|grep -v "RefSeq"`
+do
+echo $chr
+esearch -db nucleotide -query "$chr" | efetch -format fasta > chrs/sorangutan/"$chr".fasta
+done
+#########################################################################################################################
+#List all the SCFRs in the genomes of the 7 primate species
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo $species
+for chr in `ls -1 chrs/$species/*.fasta|cut -f 3 -d '/'|sed 's/\.fasta//g'`
+do
+echo $chr
+python scripts/find_stop_codon_free_regions_with_reverse_gap_report.py chrs/$species/"$chr".fasta --gaps SCFR/gaps/"$species"/gap_regions_"$chr".bed > SCFR/"$species"/"$chr".fasta.SCFRs.out
+done
+done
+#########################################################################################################################
