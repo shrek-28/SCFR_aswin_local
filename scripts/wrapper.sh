@@ -73,7 +73,7 @@ done
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo $species
-cat SCFR/gaps/"$species"/gap*.bed > SCFR_all/gaps_"$species".bed
+cat SCFR/gaps/"$species"/gap*.bed|sort -k1,1 -k2n,2 > SCFR_all/gaps_"$species".bed
 done
 #########################################################################################################################
 #get summary of all SCFRs in the genomes of the 7 primate species
