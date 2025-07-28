@@ -84,6 +84,20 @@ cat SCFR/"$species"/*.fasta.SCFRs.out|sort -k1,1 -k2n,2|bedtools intersect -v -a
 Rscript scripts/summarize_SCFR_bed_frames_all.R SCFR_all/"$species"_SCFR_all.out
 done
 #########################################################################################################################
+#get strand assymetry of SCFRs per chromosome in the genomes of the 7 primate species
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo $species
+python scripts/quantify_scfr_asymmetries_by_chrom.py SCFR_all/"$species"_SCFR_all.out SCFR_all/"$species"_SCFR_asymmetries_out.csv
+done
+#get strand assymetry of SCFRs in sliding windows across the genomes of the 7 primate species
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo $species
+python scripts/quantify_scfr_asymmetries_by_chrom_window.py SCFR_all/"$species"_SCFR_all.out --window-size 100000 --slide-size 50000 --output SCFR_all/"$species"_SCFR_asymmetries_out_win100000_slide50000.csv
+done
+
+#########################################################################################################################
 #get GC content of the SCFRs
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
