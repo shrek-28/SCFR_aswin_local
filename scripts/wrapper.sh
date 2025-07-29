@@ -97,6 +97,11 @@ echo $species
 python scripts/quantify_scfr_asymmetries_by_chrom_window.py SCFR_all/"$species"_SCFR_all.out --window-size 100000 --slide-size 50000 --output SCFR_all/"$species"_SCFR_asymmetries_out_win100000_slide50000.csv
 done
 
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo $species
+Rscript plot_strand_asymmetry_sliding_extremes.R --input SCFR_all/"$species"_SCFR_asymmetries_out_win100000_slide50000.csv --pdf SCFR_all/"$species"_sliding_outliers.pdf --bed SCFR_all/"$species"_sliding_outlier_regions.bed --min_region_size 100000 --window_len 5 --min_hits 3
+done
 #########################################################################################################################
 #get GC content of the SCFRs
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
