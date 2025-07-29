@@ -96,7 +96,7 @@ do
 echo $species
 python scripts/quantify_scfr_asymmetries_by_chrom_window.py SCFR_all/"$species"_SCFR_all.out --window-size 100000 --slide-size 50000 --output SCFR_all/"$species"_SCFR_asymmetries_out_win100000_slide50000.csv
 done
-
+#This script is actually saved as version_3_plot_strand_asymmetry_sliding_extremes.R in the scripts folder. The older versions were very sensitive to noise.
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo $species
