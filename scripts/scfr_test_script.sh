@@ -72,7 +72,7 @@ done < QC/genome_accessions
 #QC: Check length of fetched genome sequences
 
 cd /media/aswin/SCFR/SCFR-main/chrs
-time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+time for species in human bonobo chimpanzee gorilla borangutan gibbon
      do
      cd $species
      for chr in $(ls *.fasta)
@@ -99,7 +99,8 @@ done | awk '{if($2==$5) print$0,"same"; else print$0,"different"}' |  sed '1i nc
 
 #Time taken human (75m14.862s), bonobo (62m53.702s), chimpanzee (54m44.004s), gorilla (56m4.399s), borangutan (79m51.724s), sorangutan (70m45.710s), gibbon (66m39.910s)
 cd /media/aswin/SCFR/SCFR-main
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan gibbon
 do
 echo $species
 for chr in `ls -1 chrs/$species/*.fasta|cut -f 3 -d '/'|sed 's/\.fasta//g'`
@@ -111,12 +112,14 @@ python3 scripts/find_stop_codon_free_regions_with_reverse_gap_report.py chrs/$sp
 done
 wait
 done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #########################################################
 #collate all gaps
 
 cd /media/aswin/SCFR/SCFR-main
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan gibbon
 do
 echo $species
 cat SCFR/gaps/"$species"/gap*.bed|sort -k1,1 -k2n,2 > SCFR_all/gaps_"$species".bed
