@@ -95,7 +95,7 @@ for chr in $(awk '{print$1}' all_species_chr_length | egrep -v "refseq_accession
 done | awk '{if($2==$5) print$0,"same"; else print$0,"different"}' |  sed '1i ncbi_accession ncbi_length species fetched_accession fetched_length Compare_length' | column -t > compare_chromosome_length
 
 ####################################################################################################################################################################################################################################################################################################################
-#List all the SCFRs in the genomes of the 7 primate species
+#List all the SCFRs in the genomes of the 7 primate species (47.0667 min without sorangutan)
 
 #Time taken human (75m14.862s), bonobo (62m53.702s), chimpanzee (54m44.004s), gorilla (56m4.399s), borangutan (79m51.724s), sorangutan (70m45.710s), gibbon (66m39.910s)
 cd /media/aswin/SCFR/SCFR-main
@@ -130,13 +130,14 @@ done
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-time for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan gibbon
   do
   (
   echo $species
-  cat SCFR/"$species"/*.fasta.SCFRs.out|sort -k1,1 -k2n,2|bedtools intersect -v -a stdin -b SCFR_all/gaps_"$species".bed > SCFR_all/"$species"_SCFR_all.out
+  cat SCFR/"$species"/*.fasta.SCFRs.out | sort -k1,1 -k2n,2 | bedtools intersect -v -a stdin -b SCFR_all/gaps_"$species".bed > SCFR_all/"$species"_SCFR_all.out
   Rscript scripts/summarize_SCFR_bed_frames_all.R SCFR_all/"$species"_SCFR_all.out
   ) &
+  wait
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
@@ -146,12 +147,13 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-time for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan gibbon
   do
   (
   echo $species
   python3 scripts/quantify_scfr_asymmetries_by_chrom.py SCFR_all/"$species"_SCFR_all.out SCFR_all/"$species"_SCFR_asymmetries_out.csv
   ) &
+  wait
   done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
@@ -159,12 +161,13 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #get strand assymetry of SCFRs in sliding windows across the genomes of the 7 primate species (46m48.751s)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-time for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan gibbon
   do
   (
   echo $species
   python3 scripts/quantify_scfr_asymmetries_by_chrom_window.py SCFR_all/"$species"_SCFR_all.out --window-size 100000 --slide-size 50000 --output SCFR_all/"$species"_SCFR_asymmetries_out_win100000_slide50000.csv
 ) &
+wait
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
@@ -172,12 +175,13 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #This script is actually saved as version_3_plot_strand_asymmetry_sliding_extremes.R in the scripts folder. The older versions were very sensitive to noise.
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   (
   echo $species
   Rscript scripts/version_3_plot_strand_asymmetry_sliding_extremes.R --input SCFR_all/"$species"_SCFR_asymmetries_out_win100000_slide50000.csv --pdf SCFR_all/"$species"_sliding_outliers.pdf --bed SCFR_all/"$species"_sliding_outlier_regions.bed --min_region_size 100000 --window_len 5 --min_hits 3
   ) &
+  wait
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
