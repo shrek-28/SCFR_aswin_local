@@ -72,7 +72,7 @@ done < QC/genome_accessions
 #QC: Check length of fetched genome sequences
 
 cd /media/aswin/SCFR/SCFR-main/chrs
-time for species in human bonobo chimpanzee gorilla borangutan gibbon
+time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
      do
      cd $species
      for chr in $(ls *.fasta)
@@ -100,7 +100,7 @@ done | awk '{if($2==$5) print$0,"same"; else print$0,"different"}' |  sed '1i nc
 #Time taken human (75m14.862s), bonobo (62m53.702s), chimpanzee (54m44.004s), gorilla (56m4.399s), borangutan (79m51.724s), sorangutan (70m45.710s), gibbon (66m39.910s)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   echo $species
   for chr in `ls -1 chrs/$species/*.fasta|cut -f 3 -d '/'|sed 's/\.fasta//g'`
@@ -119,7 +119,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #collate all gaps
 
 cd /media/aswin/SCFR/SCFR-main
-for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   echo $species
   cat SCFR/gaps/"$species"/gap*.bed|sort -k1,1 -k2n,2 > SCFR_all/gaps_"$species".bed
@@ -131,7 +131,7 @@ done
 #37.5167 min
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   (
   echo $species
@@ -145,7 +145,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #38.7 min Since running 6 species need huge memory run 3 at a time
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   (
   echo $species
@@ -160,9 +160,10 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #########################################################################################################################
 #get strand assymetry of SCFRs per chromosome in the genomes of the 7 primate species (25m12.250s)
 
+#10.1833 mins
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   (
   echo $species
@@ -174,9 +175,10 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #get strand assymetry of SCFRs in sliding windows across the genomes of the 7 primate species (46m48.751s)
+#9.43333 mins
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   (
   echo $species
@@ -188,6 +190,7 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #This script is actually saved as version_3_plot_strand_asymmetry_sliding_extremes.R in the scripts folder. The older versions were very sensitive to noise.
+#
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -204,6 +207,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #########################################################################################################################
 #get GC content of the SCFRs
 
+#36.4 mins
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -322,53 +326,12 @@ Rscript combined_2dhist.r
 #DRAFT SCRIPTS
 ####################################################################################################################################################################################################################################################################################################################
 
-#Download
-time datasets download genome accession GCA_028878055.3 --include genome,gtf,seq-report --filename GCA_028878055.3.zip
-
-unzip -o GCA_028878055.3.zip
-cd ncbi_dataset/data/GCA_028878055.3
-
-#Get accessions
-cat sequence_report.jsonl | json2xml | xtract -pattern opt -def "-"  -element genbankAccession refseqAccession | awk '$2!="-"' > genbank_refseq_accession
-
-#Add refseq accesion in genome
-awk 'NR==FNR {map[$1]=$2; next}  /^>/ {hdr=$0; for(k in map) {if(hdr ~ ">"k"($|[[:space:]])") {sub(">"k, ">"map[k]" "k); break}}} {print}' genbank_refseq_accession test2.fa > test2_updated.fna
-
-#Add refseq accesion in genome
-time awk 'NR==FNR {map[$1]=$2; next} /^>/ {hdr=$0; for(k in map) {if(hdr~">"k"($|[[:space:]])") {sub(">"k, ">"map[k]" "k); break}}} {print}' genbank_refseq_accession test1.fa > tmp && mv tmp test1.fa
-
-time awk -iinplace 'NR==FNR {map[$1]=$2; next} /^>/ {id=substr($1,2); if (id in map) $0=">"map[id]" "id substr($0,length($1)+1)} {print}' genbank_refseq_accession test2.fna> tmp && mv tmp test2.fna
-time gawk -iinplace 'NR==FNR {map[$1]=$2; next} /^>/ {id=substr($1,2); if (id in map) $0=">"map[id]" "id substr($0,length($1)+1)} {print}' genbank_refseq_accession test3.fna > tmp && mv tmp test2.fna
-
-awk 'NR==FNR {map[$1]=$2;next} /^>/{hdr=$0 for(k in map) {if(hdr~">"k" ($|[[:space:]])") {sub(">"k, ">"map[k]" "k) break }}} {print}' genbank_refseq_accession GCA_028858775.3_NHGRI_mPanTro3-v2.1_pri_genomic.fna \
-> updated.fna
-
-start_time=$(date +%s)
-while read chr 
-do
-(
-g=$(echo $chr | awk '{print$1}')
-r=$(echo $chr | awk '{print$2}')
-echo $r $g
-sed "/$g/ s/^>/>$r /g" test2.fna -i
-) &
-done < genbank_refseq_accession
-wait
-end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
-echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+#Download large genome files
+datasets download genome accession $genome --include genome,gtf,seq-report --dehydrated --filename $genome.zip
+unzip $genome.zip -d $genome
+time datasets rehydrate --directory $genome
 
 
-#
-start_time=$(date +%s)
 
-awk 'NR==FNR {map[$1]=$2; next}
-     /^>/ {
-         id=substr($1,2)
-         if (id in map)
-             $0 = ">" map[id] " " id substr($0, length($1)+1)
-     }
-     {print}' genbank_refseq_accession test2.fna > tmp && mv tmp test2.fna
 
-end_time=$(date +%s)
-elapsed_time=$((end_time - start_time))
-echo "Elapsed time: ${elapsed_time}s"
+
