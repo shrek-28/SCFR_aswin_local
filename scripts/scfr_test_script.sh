@@ -103,7 +103,7 @@ for chr in $(awk '{print$1}' all_species_chr_length | egrep -v "refseq_accession
 done | awk '{if($2==$5) print$0,"same"; else print$0,"different"}' |  sed '1i ncbi_accession ncbi_length species fetched_accession fetched_length Compare_length' | column -t > compare_chromosome_length
 
 ####################################################################################################################################################################################################################################################################################################################
-#List all the SCFRs in the genomes of the 7 primate species (47.0667 min without sorangutan) (51.6833)
+#List all the SCFRs in the genomes of the 7 primate species (51.6833 mins)
 
 #Time taken human (75m14.862s), bonobo (62m53.702s), chimpanzee (54m44.004s), gorilla (56m4.399s), borangutan (79m51.724s), sorangutan (70m45.710s), gibbon (66m39.910s)
 cd /media/aswin/SCFR/SCFR-main
@@ -136,7 +136,7 @@ done
 #########################################################################################################################
 #get summary of all SCFRs in the genomes of the 7 primate species (251m11.981s)
 
-#35.4167
+#(35.4167 mins)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -150,7 +150,7 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#38.7 min Since running 6 species need huge memory run 3 at a time
+#Since running 6 species need huge memory run 3 at a time (1.67528 hours ~100.517 mins)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 max_jobs=3
@@ -240,7 +240,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #########################################################################################################################
 ##Download all the seven primate genome annotation files
 
-#
+#6.18333 mins
 cd /media/aswin/SCFR/SCFR-main/genes
 start_time=$(date +%s)
 declare -A urls=(
