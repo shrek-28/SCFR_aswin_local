@@ -103,7 +103,7 @@ for chr in $(awk '{print$1}' all_species_chr_length | egrep -v "refseq_accession
 done | awk '{if($2==$5) print$0,"same"; else print$0,"different"}' |  sed '1i ncbi_accession ncbi_length species fetched_accession fetched_length Compare_length' | column -t > compare_chromosome_length
 
 ####################################################################################################################################################################################################################################################################################################################
-#List all the SCFRs in the genomes of the 7 primate species (47.0667 min without sorangutan)
+#List all the SCFRs in the genomes of the 7 primate species (47.0667 min without sorangutan) (51.6833)
 
 #Time taken human (75m14.862s), bonobo (62m53.702s), chimpanzee (54m44.004s), gorilla (56m4.399s), borangutan (79m51.724s), sorangutan (70m45.710s), gibbon (66m39.910s)
 cd /media/aswin/SCFR/SCFR-main
@@ -159,7 +159,9 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   echo $species
   Rscript scripts/summarize_SCFR_bed_frames_all.R SCFR_all/"$species"_SCFR_all.out
   ) &
-  ((++i % 3 == 0)) && wait  # run 3 at a time
+  # If max_jobs reached, wait for ONE job to finish (not all)
+  if (( $(jobs -r | wc -l) >= max_jobs )); then
+  wait -n
 done
 wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
@@ -212,7 +214,7 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#########################################################################################################################
+##################################################################################################################################################################################################################################################
 #get GC content of the SCFRs
 
 #36.4 mins
