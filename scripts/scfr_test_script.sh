@@ -42,7 +42,7 @@ while read i
 done < genome_accessions
 
 cd /media/aswin/SCFR/SCFR-main/QC/genome_metadata
-find . -name "*_genome_metadata.txt" | xargs -n1 sh -c 'awk "{print\$9,\$8}" $0' | grep -v "refseq_accession" | sed '1i refseq_accession Length' > all_species_chr_length
+find . -name "*_genome_metadata.txt" | xargs -n1 sh -c 'awk "{print\$9,\$8}" $0' | grep -v "refseq_accession" | sed '1i refseq_accession Length' | grep -v "^\-" > all_species_chr_length
 
 ####################################################################################################################################################################################################################################################################################################################
 #Download all the seven primate genomes
@@ -57,6 +57,10 @@ time while read species
   #time datasets download genome accession $genome --include genome,gtf,seq-report --filename $genome".zip"
   unzip -o $genome".zip"
   cd ncbi_dataset/data/$genome
+  #If genome size is too big or the downloads gets failed, use dehydrate
+    #datasets download genome accession $genome --include genome,gtf,seq-report --dehydrated --filename $genome.zip
+    #unzip $genome.zip -od $genome
+    #datasets rehydrate --directory $genome
   #Get accessions
   cat sequence_report.jsonl | json2xml | xtract -pattern opt -def "-"  -element genbankAccession refseqAccession | awk '$2!="-"' > $genome"_genbank_refseq_accession"
   #Add refseq accesion in genome
@@ -67,6 +71,10 @@ time while read species
   unset genome name
   cd /media/aswin/SCFR/SCFR-main
 done < QC/genome_accessions
+
+#Delete mitochondrial genomes
+cd /media/aswin/SCFR/SCFR-main
+grep -vf <(awk '{print$1}' QC/genome_metadata/all_species_chr_length | grep -v "refseq_accession") <(find chrs -name "*.fasta") | xargs rm
 
 ####################################################################################################################################################################################################################################################################################################################
 #QC: Check length of fetched genome sequences
