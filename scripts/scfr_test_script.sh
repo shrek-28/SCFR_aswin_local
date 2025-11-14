@@ -136,7 +136,7 @@ done
 #########################################################################################################################
 #get summary of all SCFRs in the genomes of the 7 primate species (251m11.981s)
 
-#37.5167 min
+#35.4167
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -153,6 +153,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #38.7 min Since running 6 species need huge memory run 3 at a time
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
+max_jobs=3
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   (
@@ -162,10 +163,12 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   # If max_jobs reached, wait for ONE job to finish (not all)
   if (( $(jobs -r | wc -l) >= max_jobs )); then
   wait -n
+  fi
 done
 wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+unset max_jobs
 
 #########################################################################################################################
 #get strand assymetry of SCFRs per chromosome in the genomes of the 7 primate species (25m12.250s)
