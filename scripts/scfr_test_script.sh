@@ -355,6 +355,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 
 
+#Get genome sizes
 
 mkdir -p genome_sizes
 
