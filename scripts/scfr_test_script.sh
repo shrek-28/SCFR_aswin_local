@@ -356,7 +356,24 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 
 
+mkdir -p genome_sizes
 
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan; do
+    out=genome_sizes/${species}.genome
+    > "$out"
+
+    for fa in chrs/$species/*.fasta; do
+        chr=$(basename "$fa" .fasta)
+        len=$(awk '
+            /^>/ {next}
+            { L += length($0) }
+            END { print L }
+        ' "$fa")
+        echo -e "${chr}\t${len}" >> "$out"
+    done
+
+    echo "Created $out"
+done
 
 
 
