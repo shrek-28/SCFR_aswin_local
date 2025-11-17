@@ -331,8 +331,9 @@ cd SCFR_all
 Rscript combined_2dhist.r
 
 #########################################################################################################################
-#10. Identify gene deserts 
+#10. Gene deserts
 
+#10.1. Identify gene deserts (1 min)
 mkdir /media/aswin/SCFR/SCFR-main/gene_deserts
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -341,20 +342,16 @@ do
 (
 echo $species
 bed=$(find genes/$species/ -name "GCF_*.bed")
-python3 scripts/gene_desert_finder.py $bed --z 2 --out gene_deserts/$species"_gene_deserts"
+python3 scripts/gene_desert_finder.py $bed --z 2 --out gene_deserts/$species"_intronic_intergenic"
+python3 my_scripts/gene_desert_finder_intergenic.py $bed --z 2 --out gene_deserts/$species"_only_intergenic"
 ) &
 done
 wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-
-
-
-#Get genome sizes
-
+#10.2.Get genome sizes
 mkdir -p genome_sizes
-
 for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
     out=genome_sizes/${species}.genome
@@ -368,20 +365,17 @@ do
     echo "Created $out"
 done
 
-#Get gene desert bed file
-for f in gene_deserts/*gene_deserts.tsv; do
+#10.3. Get gene desert bed file
+for f in gene_deserts/*_only_intergenic_gene_deserts.tsv; do
     species=$(basename "$f" | cut -d'_' -f1)
-    awk 'BEGIN{OFS="\t"} NR>1 {print $1,$2,$3}' "$f" \
-    > gene_deserts/${species}.gene_deserts.bed
+    awk 'BEGIN{OFS="\t"} NR>1 {print $1,$2,$3}' "$f" > gene_deserts/${species}_only_intergenic_gene_deserts.bed
 done
 
-#Get SCFR in bed file
+#10.4. Get SCFR in bed file
 for f in SCFR_all/*SCFR_all.out; do
     species=$(basename "$f" | cut -d'_' -f1)
-    awk 'BEGIN{OFS="\t"} {print $1,$2,$3}' "$f" \
-    > SCFR_all/${species}.SCFR.bed
+    awk 'BEGIN{OFS="\t"} {print $1,$2,$3}' "$f" > SCFR_all/${species}_SCFR_all.bed
 done
-
 
 
 
