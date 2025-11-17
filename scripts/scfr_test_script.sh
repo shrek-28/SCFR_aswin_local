@@ -377,7 +377,8 @@ for f in SCFR_all/*SCFR_all.out; do
     awk 'BEGIN{OFS="\t"} {print $1,$2,$3}' "$f" > SCFR_all/${species}_SCFR_all.bed
 done
 
-
+python3 compute_desert_stats.py gene_deserts/*.bed
+Rscript plot_gene_desert_stats_2.r all_desert_lengths.tsv
 
 
 
