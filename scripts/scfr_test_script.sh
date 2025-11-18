@@ -404,8 +404,7 @@ bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/
 ####################################################################################################################################################################################################################################################################################################################
 #Filter SCFRs that are part of coding region
 
-#Filter with different length cut offs (14.9833 mins)
-mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists
+#Filter with different length cut offs (16.0167 mins)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for win in 100 500 1000 2500 5000 7500 10000
@@ -416,12 +415,11 @@ mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
   do
   (
   echo " -"$species
-  #mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/$species
   cds=$(find genes/$species/ -name "GCF_*.bed")
-  #Filter SCFRs longer than 5kb
-  awk -v a="$win" '{if($3-$2>=a) print$1,$2,$3,$4}' OFS="\t" SCFR_all/${species}_SCFR_all.out > SCFR_lists/${win}/${species}"_SCFR_atleast_5kb.out"
+  #Filter SCFRs longer than the window
+  awk -v a="$win" '{if($3-$2>=a) print$1,$2,$3,$4}' OFS="\t" SCFR_all/${species}_SCFR_all.out > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out"
   #Get SCFRs that don't overlap with coding genes
-  bedtools intersect -v -a SCFR_lists/${win}/${species}"_SCFR_atleast_5kb.out" -b $cds | awk '{print$1,$2,$3,$4,$3-$2}' OFS="\t" > SCFR_lists/${win}/$species"_scfr_atleast_5kb_in_non_coding.bed"
+  bedtools intersect -v -a SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" -b $cds | awk '{print$1,$2,$3,$4,$3-$2}' OFS="\t" > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed"
   ) &
   done
 wait
@@ -432,38 +430,27 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 
 
-
-
-
 ####################################################################################################################################################################################################################################################################################################################
 #12. Quantification of codon usage patterns and PCA:
 
-#Create SCFR beds with different cutoff length
+#Create SCFR beds with different cut-off lengths
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo ">"$species
-for win in 1000 5000 10000
+for win in 5000 7500 10000
 do
 echo " -"$win
 mkdir -p PCA/"$species"/"$win"
-for chr in `cat SCFR_lists/${win}/${species}"_scfr_atleast_5kb_in_non_coding.bed" | cut -f 1|sort -u`
+for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | cut -f 1|sort -u`
 do
-cat SCFR_lists/${win}/${species}"_scfr_atleast_5kb_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/"$chr".fasta
+cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/"$chr".fasta
 done
 #Calculate codon metrics
-python3 codon_usage_metrics.py
-mv global_metrics.tsv PCA/"$species"/$win/global_metrics.tsv
-mv regional_metrics.tsv PCA/"$species"/$win/regional_metrics.tsv
-mv rscu.tsv PCA/"$species"/$win/rscu.tsv
-cp scripts/plotPCA.r PCA/"$species"/$win/plotPCA.r
-cd PCA/"$species"/$win/
-Rscript plotPCA.r
-cd ..
-cd ..
-cd ..
+python3 scripts/codon_usage_metrics.py PCA/${species}/${win} PCA/${species}/${win}
+Rscript scripts/plotPCA.r PCA/"$species"/$win/ PCA/"$species"/$win/
 done
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
