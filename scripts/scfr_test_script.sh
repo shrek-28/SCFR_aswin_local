@@ -408,7 +408,7 @@ bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/
 mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for win in 100 500 1000 5000 10000
+for win in 100 500 1000 2500 5000 7500 10000
 do
 echo ">"$win
 mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
