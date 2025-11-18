@@ -377,8 +377,19 @@ for f in SCFR_all/*SCFR_all.out; do
     awk 'BEGIN{OFS="\t"} {print $1,$2,$3}' "$f" > SCFR_all/${species}_SCFR_all.bed
 done
 
+#Explore data
+cd /media/aswin/SCFR/SCFR-main/
 python3 compute_desert_stats.py gene_deserts/*.bed
 Rscript plot_gene_desert_stats_2.r all_desert_lengths.tsv
+
+#Merge SCFRs into genome-wide intervals
+time sort -k1,1 -k2,2n SCFR_all/human_SCFR_all.out > human_SCFR_all_sorted.out
+time bedtools merge -i human_SCFR_all_sorted.out | awk '{print$1,$2,$3}' OFS="\t" > human_SCFR_all_sorted_merged.bed
+#Keep only long SCFRs
+time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorted_merged_atleast_1kb.bed
+#Fisher's test
+bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
+
 
 
 
