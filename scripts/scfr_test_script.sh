@@ -434,11 +434,9 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 ####################################################################################################################################################################################################################################################################################################################
 #12. Quantification of codon usage patterns and PCA:
 
-#Create SCFR beds with different cut-off lengths
-
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo ">"$species
 for win in 5000 7500 10000
@@ -459,8 +457,8 @@ done
 #Calculate codon metrics
 python3 scripts/codon_usage_metrics.py PCA/${species}/${win}/with_coding_region PCA/${species}/${win}/with_coding_region
 python3 scripts/codon_usage_metrics.py PCA/${species}/${win}/without_coding_region PCA/${species}/${win}/without_coding_region
-Rscript plotPCA.r PCA/"$species"/$win/with_coding_region PCA/"$species"/$win/with_coding_region
-Rscript plotPCA.r PCA/"$species"/$win/without_coding_region PCA/"$species"/$win/without_coding_region
+Rscript scripts/plotPCA.r PCA/"$species"/$win/with_coding_region PCA/"$species"/$win/with_coding_region
+Rscript scripts/plotPCA.r PCA/"$species"/$win/without_coding_region PCA/"$species"/$win/without_coding_region
 done
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
