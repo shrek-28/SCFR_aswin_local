@@ -11,7 +11,6 @@ mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
   do
   (
   echo " -"$species
-  #mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/$species
   cds=$(find genes/$species/ -name "GCF_*.bed")
   #Filter SCFRs longer than the window
   awk -v a="$win" '{if($3-$2>=a) print$1,$2,$3,$4}' OFS="\t" SCFR_all/${species}_SCFR_all.out > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out"
