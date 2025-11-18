@@ -430,6 +430,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 
 
+
 ####################################################################################################################################################################################################################################################################################################################
 #12. Quantification of codon usage patterns and PCA:
 
@@ -443,14 +444,23 @@ echo ">"$species
 for win in 5000 7500 10000
 do
 echo " -"$win
-mkdir -p PCA/"$species"/"$win"
+#For SCFRs of atleast a specific length
+mkdir -p PCA/"$species"/"$win"/with_coding_region
 for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | cut -f 1|sort -u`
 do
-cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/"$chr".fasta
+cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/with_coding_region/"$chr".fasta
+done
+#For SCFRs of atleast a specific length and with no overlap with coding region
+mkdir -p PCA/"$species"/"$win"/without_coding_region
+for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | cut -f 1|sort -u`
+do
+cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/without_coding_region/"$chr".fasta
 done
 #Calculate codon metrics
-python3 scripts/codon_usage_metrics.py PCA/${species}/${win} PCA/${species}/${win}
-Rscript scripts/plotPCA.r PCA/"$species"/$win/ PCA/"$species"/$win/
+python3 scripts/codon_usage_metrics.py PCA/${species}/${win}/with_coding_region PCA/${species}/${win}/with_coding_region
+python3 scripts/codon_usage_metrics.py PCA/${species}/${win}/without_coding_region PCA/${species}/${win}/without_coding_region
+Rscript plotPCA.r PCA/"$species"/$win/with_coding_region PCA/"$species"/$win/with_coding_region
+Rscript plotPCA.r PCA/"$species"/$win/without_coding_region PCA/"$species"/$win/without_coding_region
 done
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
