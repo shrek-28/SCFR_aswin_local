@@ -23,8 +23,12 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   mkdir -p SCFR_all
   mkdir -p scripts
   mkdir -p QC/genome_metadata
+  mkdir -p SCFR_lists
   gene_deserts
 done
+
+#mkdir github
+#mv SCFR_lists PCA github/
 
 #List of genomic accesions for analysis
 echo -e "GCA_009914755.4\thuman\nGCA_028858775.3\tchimpanzee\nGCA_029289425.3\tbonobo\nGCA_028878055.3\tgibbon\nGCA_029281585.3\tgorilla\nGCA_028885625.3\tborangutan\nGCA_028885655.3\tsorangutan" > QC/genome_accessions
@@ -397,30 +401,60 @@ time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorte
 bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
 
 
+####################################################################################################################################################################################################################################################################################################################
+#Filter SCFRs that are part of coding region
+
+#Filter with different length cut offs (14.9833 mins)
+mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for win in 100 500 1000 5000 10000
+do
+echo ">"$win
+mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
+  for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+  do
+  (
+  echo " -"$species
+  #mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/$species
+  cds=$(find genes/$species/ -name "GCF_*.bed")
+  #Filter SCFRs longer than 5kb
+  awk -v a="$win" '{if($3-$2>=a) print$1,$2,$3,$4}' OFS="\t" SCFR_all/${species}_SCFR_all.out > SCFR_lists/${win}/${species}"_SCFR_atleast_5kb.out"
+  #Get SCFRs that don't overlap with coding genes
+  bedtools intersect -v -a SCFR_lists/${win}/${species}"_SCFR_atleast_5kb.out" -b $cds | awk '{print$1,$2,$3,$4,$3-$2}' OFS="\t" > SCFR_lists/${win}/$species"_scfr_atleast_5kb_in_non_coding.bed"
+  ) &
+  done
+wait
+unset species cds
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
+
+
 
 
 ####################################################################################################################################################################################################################################################################################################################
-#11. Quantification of codon usage patterns and PCA:
-
-#mkdir github
-#mv PCA github/
+#12. Quantification of codon usage patterns and PCA:
 
 #Create SCFR beds with different cutoff length
 
-
-
 cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
-echo $species
-for win in 10Kb
+echo ">"$species
+for win in 1000 5000 10000
 do
+echo " -"$win
 mkdir -p PCA/"$species"/"$win"
-for chr in `cat SCFR_all/"$species"_"$win"_SCFRs.out|cut -f 1|sort -u`
+for chr in `cat SCFR_lists/${win}/${species}"_scfr_atleast_5kb_in_non_coding.bed" | cut -f 1|sort -u`
 do
-cat SCFR_all/"$species"_"$win"_SCFRs.out|awk -v k=$chr '$1==k{print $0}'|sort -k1,1 -k2n,2|bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/"$chr".fasta
+cat SCFR_lists/${win}/${species}"_scfr_atleast_5kb_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/"$chr".fasta
 done
-python codon_usage_metrics.py
+#Calculate codon metrics
+python3 codon_usage_metrics.py
 mv global_metrics.tsv PCA/"$species"/$win/global_metrics.tsv
 mv regional_metrics.tsv PCA/"$species"/$win/regional_metrics.tsv
 mv rscu.tsv PCA/"$species"/$win/rscu.tsv
@@ -432,35 +466,9 @@ cd ..
 cd ..
 done
 done
-
-####################################################################################################################################################################################################################################################################################################################
-#Filter SCFRs that are part of coding region
-
-#mv SCFR_lists github/
-
-mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/5kb
-cd /media/aswin/SCFR/SCFR-main
-
-start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-(
-echo $species
-#mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/$species
-cds=$(find genes/$species/ -name "GCF_*.bed")
-#Filter SCFRs longer than 5kb
-awk '{if($3-$2>=5000) print$1,$2,$3,$4}' OFS="\t" SCFR_all/${species}_SCFR_all.out > SCFR_lists/5kb/${species}"_SCFR_atleast_5kb.out"
-#Get SCFRs that don't overlap with coding genes
-bedtools intersect -v -a SCFR_lists/5kb/${species}"_SCFR_atleast_5kb.out" -b $cds > SCFR_lists/5kb/$species"_scfr_atleast_5kb_in_non_coding.bed"
-#Get SCFRs that don't overlap with coding genes
-bedtools intersect -v -a SCFR_all/${species}_SCFR_all.out -b $cds > SCFR_lists/5kb/$species"_scfr_in_non_coding.bed"
-#Filter SCFRs longer than 5kb
-awk '{if($3-$2>=5000) print$1,$2,$3,$4,$3-$2}' OFS="\t" SCFR_lists/5kb/$species"_scfr_in_non_coding.bed" > SCFR_lists/5kb/$species"_scfr_in_non_coding_atleast_5kb.bed"
-) &
-done
-wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
