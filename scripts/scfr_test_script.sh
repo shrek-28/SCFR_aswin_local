@@ -432,7 +432,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 
 ####################################################################################################################################################################################################################################################################################################################
-#12. Quantification of codon usage patterns and PCA:
+#12. Quantification of codon usage patterns and PCA (11.8167 mins)
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
