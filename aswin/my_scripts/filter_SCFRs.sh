@@ -1,6 +1,6 @@
 #Filter SCFRs that are part of coding region
 
-#Filter with different length cut offs (14.9833 mins)
+#Filter with different length cut offs (16.0167 mins)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for win in 100 500 1000 2500 5000 7500 10000
