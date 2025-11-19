@@ -465,6 +465,22 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 
+mkdir /media/aswin/SCFR/SCFR-main/PCA_without_labels
+cd /media/aswin/SCFR/SCFR-main/PCA_without_labels
+
+cp -r PCA/* PCA_without_labels/
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+for win in 5000 7500 10000
+do
+Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/with_coding_region PCA_without_labels/"$species"/$win/with_coding_region
+Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/without_coding_region PCA_without_labels/"$species"/$win/without_coding_region
+done
+done
+find PCA_without_labels/ -name "*.fasta" | xargs rm
+
+
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
 #DRAFT SCRIPTS
