@@ -24,7 +24,8 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   mkdir -p scripts
   mkdir -p QC/genome_metadata
   mkdir -p SCFR_lists
-  gene_deserts
+  mkdir -p Fourier_analysis
+  mkdir -p gene_deserts
 done
 
 #mkdir github
@@ -479,6 +480,19 @@ Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/w
 done
 done
 find PCA_without_labels/ -name "*.fasta" | xargs rm
+
+####################################################################################################################################################################################################################################################################################################################
+
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
+gzip -d GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
+
+python3 split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna .
+
+time python3 fft_motif_report_grouped.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o .
+python split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna CDS200
+
+python fft_motif_analysis.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o output_folder
 
 
 ####################################################################################################################################################################################################################################################################################################################
