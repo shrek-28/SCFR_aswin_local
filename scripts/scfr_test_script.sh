@@ -482,17 +482,7 @@ done
 find PCA_without_labels/ -name "*.fasta" | xargs rm
 
 ####################################################################################################################################################################################################################################################################################################################
-
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
-gzip -d GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
-
-python3 split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna .
-
-time python3 fft_motif_report_grouped.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o .
-python split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna CDS200
-
-python fft_motif_analysis.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o output_folder
+#13. Discrete Fourier Transform Analysis
 
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
 cp -r ../PCA/* .
@@ -508,13 +498,15 @@ cd $species/5000/without_coding_region/
 for scfr in $(ls *.fasta)
 do
 echo " -"$scfr
-time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/parallel_fft_motif_report_grouped_optimised.py -o "output_"$scfr -t 32 $scfr
+time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$scfr -t 32 $scfr
 done
 unset scfr
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
@@ -528,5 +520,15 @@ time datasets rehydrate --directory $genome
 
 
 
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
+gzip -d GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
+
+python3 split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna .
+
+time python3 fft_motif_report_grouped.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o .
+python split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna CDS200
+
+python fft_motif_analysis.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o output_folder
 
 
