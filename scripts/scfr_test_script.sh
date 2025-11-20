@@ -403,7 +403,7 @@ bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/
 
 
 ####################################################################################################################################################################################################################################################################################################################
-#Filter SCFRs that are part of coding region
+#11. Filter SCFRs that are part of coding region
 
 #Filter with different length cut offs (16.0167 mins)
 cd /media/aswin/SCFR/SCFR-main
@@ -428,9 +428,6 @@ unset species cds
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
-
-
 
 ####################################################################################################################################################################################################################################################################################################################
 #12. Quantification of codon usage patterns and PCA (11.8167 mins)
@@ -465,7 +462,7 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-
+#For easier visual inspection plot PCA without labels
 mkdir /media/aswin/SCFR/SCFR-main/PCA_without_labels
 cd /media/aswin/SCFR/SCFR-main/PCA_without_labels
 
@@ -483,32 +480,6 @@ find PCA_without_labels/ -name "*.fasta" | xargs rm
 
 ####################################################################################################################################################################################################################################################################################################################
 #13. Discrete Fourier Transform Analysis
-
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-cp -r ../PCA/* .
-find . -name "*.tsv" | xargs rm
-find . -name "*.pdf" | grep -v fft | xargs rm
-
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-echo ">"$species
-for win in 1000 2500 5000 7500 10000
-cd $species/5000/without_coding_region/
-for scfr in $(ls *.fasta)
-do
-echo " -"$scfr
-time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$scfr -t 32 $scfr
-done
-unset scfr
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-done
-end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
-echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
-
-
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -551,6 +522,10 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"species
+
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
@@ -562,17 +537,42 @@ datasets download genome accession $genome --include genome,gtf,seq-report --deh
 unzip $genome.zip -d $genome
 time datasets rehydrate --directory $genome
 
-
-
+#Fourier ananlysis
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
 wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
 gzip -d GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
-
 python3 split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna .
-
 time python3 fft_motif_report_grouped.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o .
 python split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna CDS200
-
 python fft_motif_analysis.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o output_folder
+
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+cp -r ../PCA/* .
+find . -name "*.tsv" | xargs rm
+find . -name "*.pdf" | grep -v fft | xargs rm
+
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+for win in 1000 2500 5000 7500 10000
+cd $species/5000/without_coding_region/
+for scfr in $(ls *.fasta)
+do
+echo " -"$scfr
+time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$scfr -t 32 $scfr
+done
+unset scfr
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+##
+
+grep -v "^#" GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | awk '{for (i=1;i<=NF;i++) if($i ~/gene_biotype/) print $(i+1)}' | sort | uniq -c > annotation_types
+
+
 
 
