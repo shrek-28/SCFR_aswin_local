@@ -1,0 +1,25 @@
+\contentsline {section}{\numberline {1}Group 1: Single Peak at 0.33}{2}{section.1}
+\contentsline {section}{\numberline {2}Group 2: Single Peak Elsewhere}{2}{section.2}
+\contentsline {section}{\numberline {3}Group 3: Multiple Peaks}{2}{section.3}
+\contentsline {subsection}{\numberline {3.1}SCFR\_NC\_060936.1\_133005159\_133010910}{2}{subsection.3.1}
+\contentsline {subsubsection}{\numberline {3.1.1}Protein: frame1}{2}{subsubsection.3.1.1}
+\contentsline {subsection}{\numberline {3.2}SCFR\_NC\_060936.1\_131622820\_131629414}{3}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Protein: frame2}{3}{subsubsection.3.2.1}
+\contentsline {subsection}{\numberline {3.3}SCFR\_NC\_060936.1\_132290033\_132296255}{4}{subsection.3.3}
+\contentsline {subsubsection}{\numberline {3.3.1}Protein: frame3}{4}{subsubsection.3.3.1}
+\contentsline {subsection}{\numberline {3.4}SCFR\_NC\_060936.1\_131623112\_131629325}{5}{subsection.3.4}
+\contentsline {subsubsection}{\numberline {3.4.1}Protein: frame3}{5}{subsubsection.3.4.1}
+\contentsline {subsection}{\numberline {3.5}SCFR\_NC\_060936.1\_133004969\_133010465}{6}{subsection.3.5}
+\contentsline {subsubsection}{\numberline {3.5.1}Protein: frame3}{6}{subsubsection.3.5.1}
+\contentsline {subsection}{\numberline {3.6}SCFR\_NC\_060936.1\_133005175\_133011940}{7}{subsection.3.6}
+\contentsline {subsubsection}{\numberline {3.6.1}Protein: frame2}{7}{subsubsection.3.6.1}
+\contentsline {subsection}{\numberline {3.7}SCFR\_NC\_060936.1\_133005146\_133011884}{8}{subsection.3.7}
+\contentsline {subsubsection}{\numberline {3.7.1}Protein: frame-2}{8}{subsubsection.3.7.1}
+\contentsline {subsection}{\numberline {3.8}SCFR\_NC\_060936.1\_2251543\_2257381}{9}{subsection.3.8}
+\contentsline {subsubsection}{\numberline {3.8.1}Protein: frame2}{9}{subsubsection.3.8.1}
+\contentsline {subsection}{\numberline {3.9}SCFR\_NC\_060936.1\_131622648\_131629353}{10}{subsection.3.9}
+\contentsline {subsubsection}{\numberline {3.9.1}Protein: frame1}{10}{subsubsection.3.9.1}
+\contentsline {subsection}{\numberline {3.10}SCFR\_NC\_060936.1\_133005018\_133011888}{11}{subsection.3.10}
+\contentsline {subsubsection}{\numberline {3.10.1}Protein: frame-1}{11}{subsubsection.3.10.1}
+\contentsline {subsection}{\numberline {3.11}SCFR\_NC\_060936.1\_133005142\_133011970}{12}{subsection.3.11}
+\contentsline {subsubsection}{\numberline {3.11.1}Protein: frame-3}{12}{subsubsection.3.11.1}

@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{hyperref}
+\geometry{margin=1in}
+\title{Fourier Spectral Analysis of Coding Sequences}
+\author{Automated Report}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Group 1: Single Peak at 0.33}
+\section{Group 2: Single Peak Elsewhere}
+\section{Group 3: Multiple Peaks}
+\subsection{SCFR\_NC\_060946.1\_20758991\_20765624}\label{sec:3_SCFR_NC_060946_1_20758991_20765624}
+\subsubsection{Protein: frame3}
+\textbf{Gene ID}: SCFR\\
+\textbf{Nucleotide Accession}: NC\_060946.1\\
+\textbf{Sequence Length}: 6633 bp\\
+\textbf{Protein Description}: \\ \begin{minipage}[t]{\linewidth} Stop-codon-free region (20758991-20765624) \end{minipage} \\ 
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{SCFR_NC_060946_1_20758991_20765624_frame3_fft.png}
+\caption{FFT Spectrum for frame3}
+\end{figure}
+\begin{longtable}{|c|c|}
+\hline
+Frequency & Motifs\\\hline
+0.333 & CG (1045), GC (835), CC (657), GG (620), GA (478)\\\hline
+0.333 & CGC (543), ACG (390), AGG (387), GCC (359), TCG (284)\\\hline
+0.074 & AACGAGGACGCCG (76), TCGCTAACGAGGA (58), AGGACGCCGCCCA (56), GTCGCTAACGAGG (54), GAGGACGCCGCCC (53)\\\hline
+\end{longtable}
+\newpage
+\subsection{SCFR\_NC\_060946.1\_20759017\_20765623}\label{sec:3_SCFR_NC_060946_1_20759017_20765623}
+\subsubsection{Protein: frame-2}
+\textbf{Gene ID}: SCFR\\
+\textbf{Nucleotide Accession}: NC\_060946.1\\
+\textbf{Sequence Length}: 6606 bp\\
+\textbf{Protein Description}: \\ \begin{minipage}[t]{\linewidth} Stop-codon-free region (20759017-20765623) \end{minipage} \\ 
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{SCFR_NC_060946_1_20759017_20765623_frame_2_fft.png}
+\caption{FFT Spectrum for frame-2}
+\end{figure}
+\begin{longtable}{|c|c|}
+\hline
+Frequency & Motifs\\\hline
+0.333 & CG (1042), GC (831), CC (655), GG (619), GA (477)\\\hline
+0.333 & CGC (541), ACG (390), AGG (386), GCC (358), TCG (282)\\\hline
+0.074 & AACGAGGACGCCG (76), TCGCTAACGAGGA (58), AGGACGCCGCCCA (56), GTCGCTAACGAGG (54), GAGGACGCCGCCC (53)\\\hline
+\end{longtable}
+\newpage
+\end{document}

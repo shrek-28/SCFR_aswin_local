@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{hyperref}
+\geometry{margin=1in}
+\title{Fourier Spectral Analysis of Coding Sequences}
+\author{Automated Report}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Group 1: Single Peak at 0.33}
+\section{Group 2: Single Peak Elsewhere}
+\section{Group 3: Multiple Peaks}
+\subsection{SCFR\_NC\_060942.1\_74425633\_74430805}\label{sec:3_SCFR_NC_060942_1_74425633_74430805}
+\subsubsection{Protein: frame-2}
+\textbf{Gene ID}: SCFR\\
+\textbf{Nucleotide Accession}: NC\_060942.1\\
+\textbf{Sequence Length}: 5172 bp\\
+\textbf{Protein Description}: \\ \begin{minipage}[t]{\linewidth} Stop-codon-free region (74425633-74430805) \end{minipage} \\ 
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{SCFR_NC_060942_1_74425633_74430805_frame_2_fft.png}
+\caption{FFT Spectrum for frame-2}
+\end{figure}
+\begin{longtable}{|c|c|}
+\hline
+Frequency & Motifs\\\hline
+0.481 & GG (2074), GA (942), AG (766), TG (445), GT (256)\\\hline
+0.296 & GGG (1115), GGA (588), AGG (578), GAG (574), TGG (372)\\\hline
+0.111 & GGGTGGGA (189), GGTGGGAG (188), AGGGTGGG (185), GGGGGATG (179), GGGGATGG (176)\\\hline
+\end{longtable}
+\newpage
+\end{document}

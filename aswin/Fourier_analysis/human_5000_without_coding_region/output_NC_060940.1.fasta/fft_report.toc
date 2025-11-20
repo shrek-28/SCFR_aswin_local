@@ -1,0 +1,5 @@
+\contentsline {section}{\numberline {1}Group 1: Single Peak at 0.33}{2}{section.1}
+\contentsline {section}{\numberline {2}Group 2: Single Peak Elsewhere}{2}{section.2}
+\contentsline {section}{\numberline {3}Group 3: Multiple Peaks}{2}{section.3}
+\contentsline {subsection}{\numberline {3.1}SCFR\_NC\_060940.1\_1751049\_1756365}{2}{subsection.3.1}
+\contentsline {subsubsection}{\numberline {3.1.1}Protein: frame-3}{2}{subsubsection.3.1.1}

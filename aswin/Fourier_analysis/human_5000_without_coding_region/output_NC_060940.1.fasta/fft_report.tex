@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{hyperref}
+\geometry{margin=1in}
+\title{Fourier Spectral Analysis of Coding Sequences}
+\author{Automated Report}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Group 1: Single Peak at 0.33}
+\section{Group 2: Single Peak Elsewhere}
+\section{Group 3: Multiple Peaks}
+\subsection{SCFR\_NC\_060940.1\_1751049\_1756365}\label{sec:3_SCFR_NC_060940_1_1751049_1756365}
+\subsubsection{Protein: frame-3}
+\textbf{Gene ID}: SCFR\\
+\textbf{Nucleotide Accession}: NC\_060940.1\\
+\textbf{Sequence Length}: 5316 bp\\
+\textbf{Protein Description}: \\ \begin{minipage}[t]{\linewidth} Stop-codon-free region (1751049-1756365) \end{minipage} \\ 
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{SCFR_NC_060940_1_1751049_1756365_frame_3_fft.png}
+\caption{FFT Spectrum for frame-3}
+\end{figure}
+\begin{longtable}{|c|c|}
+\hline
+Frequency & Motifs\\\hline
+0.5 & GT (1074), TG (1022), CC (532), CG (486), GA (482)\\\hline
+0.499 & GT (1074), TG (1022), CC (532), CG (486), GA (482)\\\hline
+0.499 & GT (1074), TG (1022), CC (532), CG (486), GA (482)\\\hline
+\end{longtable}
+\newpage
+\end{document}

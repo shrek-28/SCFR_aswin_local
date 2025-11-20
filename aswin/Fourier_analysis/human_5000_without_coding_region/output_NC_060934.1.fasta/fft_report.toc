@@ -1,0 +1,29 @@
+\contentsline {section}{\numberline {1}Group 1: Single Peak at 0.33}{2}{section.1}
+\contentsline {section}{\numberline {2}Group 2: Single Peak Elsewhere}{2}{section.2}
+\contentsline {section}{\numberline {3}Group 3: Multiple Peaks}{2}{section.3}
+\contentsline {subsection}{\numberline {3.1}SCFR\_NC\_060934.1\_1232284\_1239049}{2}{subsection.3.1}
+\contentsline {subsubsection}{\numberline {3.1.1}Protein: frame2}{2}{subsubsection.3.1.1}
+\contentsline {subsection}{\numberline {3.2}SCFR\_NC\_060934.1\_131972693\_131978090}{3}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Protein: frame-2}{3}{subsubsection.3.2.1}
+\contentsline {subsection}{\numberline {3.3}SCFR\_NC\_060934.1\_133769541\_133774647}{4}{subsection.3.3}
+\contentsline {subsubsection}{\numberline {3.3.1}Protein: frame-1}{4}{subsubsection.3.3.1}
+\contentsline {subsection}{\numberline {3.4}SCFR\_NC\_060934.1\_18577128\_18582279}{5}{subsection.3.4}
+\contentsline {subsubsection}{\numberline {3.4.1}Protein: frame-1}{5}{subsubsection.3.4.1}
+\contentsline {subsection}{\numberline {3.5}SCFR\_NC\_060934.1\_134091100\_134096386}{6}{subsection.3.5}
+\contentsline {subsubsection}{\numberline {3.5.1}Protein: frame-3}{6}{subsubsection.3.5.1}
+\contentsline {subsection}{\numberline {3.6}SCFR\_NC\_060934.1\_131972550\_131978775}{7}{subsection.3.6}
+\contentsline {subsubsection}{\numberline {3.6.1}Protein: frame-1}{7}{subsubsection.3.6.1}
+\contentsline {subsection}{\numberline {3.7}SCFR\_NC\_060934.1\_134060533\_134067874}{8}{subsection.3.7}
+\contentsline {subsubsection}{\numberline {3.7.1}Protein: frame-3}{8}{subsubsection.3.7.1}
+\contentsline {subsection}{\numberline {3.8}SCFR\_NC\_060934.1\_1232489\_1239410}{9}{subsection.3.8}
+\contentsline {subsubsection}{\numberline {3.8.1}Protein: frame3}{9}{subsubsection.3.8.1}
+\contentsline {subsection}{\numberline {3.9}SCFR\_NC\_060934.1\_134060672\_134067875}{10}{subsection.3.9}
+\contentsline {subsubsection}{\numberline {3.9.1}Protein: frame3}{10}{subsubsection.3.9.1}
+\contentsline {subsection}{\numberline {3.10}SCFR\_NC\_060934.1\_134060784\_134067861}{11}{subsection.3.10}
+\contentsline {subsubsection}{\numberline {3.10.1}Protein: frame1}{11}{subsubsection.3.10.1}
+\contentsline {subsection}{\numberline {3.11}SCFR\_NC\_060934.1\_1232409\_1239024}{12}{subsection.3.11}
+\contentsline {subsubsection}{\numberline {3.11.1}Protein: frame1}{12}{subsubsection.3.11.1}
+\contentsline {subsection}{\numberline {3.12}SCFR\_NC\_060934.1\_134060783\_134067989}{13}{subsection.3.12}
+\contentsline {subsubsection}{\numberline {3.12.1}Protein: frame-2}{13}{subsubsection.3.12.1}
+\contentsline {subsection}{\numberline {3.13}SCFR\_NC\_060934.1\_134091083\_134096327}{14}{subsection.3.13}
+\contentsline {subsubsection}{\numberline {3.13.1}Protein: frame-2}{14}{subsubsection.3.13.1}
