@@ -494,6 +494,7 @@ start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo ">"$species
+for win in 1000 2500 5000 7500 10000
 cd $species/5000/without_coding_region/
 for scfr in $(ls *.fasta)
 do
@@ -502,6 +503,49 @@ time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_moti
 done
 unset scfr
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
+
+
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+for win in 1000 2500 5000 7500 10000
+do
+echo " -"$win
+#For SCFRs of atleast a specific length
+	mkdir -p Fourier_analysis/"$species"/"$win"/with_coding_region
+	for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | cut -f 1|sort -u`
+	do
+	cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > Fourier_analysis/"$species"/"$win"/with_coding_region/"$chr".fasta
+	done
+#For SCFRs of atleast a specific length and with no overlap with coding region
+	mkdir -p Fourier_analysis/"$species"/"$win"/without_coding_region
+	for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | cut -f 1|sort -u`
+	do
+	cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > Fourier_analysis/"$species"/"$win"/without_coding_region/"$chr".fasta
+	done
+#Run Fourier analysis
+	for type in with_coding_region without_coding_region
+	do
+	cd Fourier_analysis/"$species"/"$win"/"$type"/
+	for scfr in $(ls *.fasta)
+	do
+	echo " -"$scfr
+	python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$scfr -t 32 $scfr
+	done
+  unset scfr
+	cd /media/aswin/SCFR/SCFR-main
+	done
+unset chr type
+done
+unset win
+cd /media/aswin/SCFR/SCFR-main
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
