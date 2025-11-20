@@ -494,6 +494,27 @@ python split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.f
 
 python fft_motif_analysis.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o output_folder
 
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+cp -r ../PCA/* .
+find . -name "*.tsv" | xargs rm
+find . -name "*.pdf" | grep -v fft | xargs rm
+
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+cd $species/5000/without_coding_region/
+for scfr in $(ls *.fasta)
+do
+echo " -"$scfr
+time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/parallel_fft_motif_report_grouped_optimised.py -o "output_"$scfr -t 32 $scfr
+done
+unset scfr
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
