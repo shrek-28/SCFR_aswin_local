@@ -444,13 +444,13 @@ echo " -"$win
 mkdir -p PCA/"$species"/"$win"/with_coding_region
 for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | cut -f 1|sort -u`
 do
-cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/with_coding_region/"$chr".fasta
+cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ -s > PCA/"$species"/"$win"/with_coding_region/"$chr".fasta
 done
 #For SCFRs of atleast a specific length and with no overlap with coding region
 mkdir -p PCA/"$species"/"$win"/without_coding_region
 for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | cut -f 1|sort -u`
 do
-cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > PCA/"$species"/"$win"/without_coding_region/"$chr".fasta
+cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ -s > PCA/"$species"/"$win"/without_coding_region/"$chr".fasta
 done
 #Calculate codon metrics
 python3 scripts/codon_usage_metrics.py PCA/${species}/${win}/with_coding_region PCA/${species}/${win}/with_coding_region
@@ -493,13 +493,13 @@ echo " -"$win
 	mkdir -p Fourier_analysis/"$species"/"$win"/with_coding_region
 	for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | cut -f 1|sort -u`
 	do
-	cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > Fourier_analysis/"$species"/"$win"/with_coding_region/"$chr".fasta
+	cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ -s > Fourier_analysis/"$species"/"$win"/with_coding_region/"$chr".fasta
 	done
 #For SCFRs of atleast a specific length and with no overlap with coding region
 	mkdir -p Fourier_analysis/"$species"/"$win"/without_coding_region
 	for chr in `cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | cut -f 1|sort -u`
 	do
-	cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ > Fourier_analysis/"$species"/"$win"/without_coding_region/"$chr".fasta
+	cat SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed" | awk -v k=$chr '$1==k{print $0}' | sort -k1,1 -k2n,2 | bedtools getfasta -fi chrs/"$species"/"$chr".fasta -bed stdin -name+ -s > Fourier_analysis/"$species"/"$win"/without_coding_region/"$chr".fasta
 	done
 #Run Fourier analysis
 	for type in with_coding_region without_coding_region
