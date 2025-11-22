@@ -430,7 +430,7 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 ####################################################################################################################################################################################################################################################################################################################
-#12. Quantification of codon usage patterns and PCA (11.8167 mins)
+#12. Quantification of codon usage patterns and PCA (10.7167 mins)
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -464,11 +464,14 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#For easier visual inspection plot PCA without labels
+#For easier visual inspection plot PCA without labels (2.46667 mins)
 mkdir /media/aswin/SCFR/SCFR-main/PCA_without_labels
-cd /media/aswin/SCFR/SCFR-main/PCA_without_labels
-
+cd /media/aswin/SCFR/SCFR-main/
 cp -r PCA/* PCA_without_labels/
+find PCA_without_labels/ -name "*.pdf" | xargs rm
+find PCA_without_labels/ -name "*.fasta" | xargs rm
+
+start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo ">"$species
@@ -478,7 +481,8 @@ Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/w
 Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/without_coding_region PCA_without_labels/"$species"/$win/without_coding_region
 done
 done
-find PCA_without_labels/ -name "*.fasta" | xargs rm
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 ####################################################################################################################################################################################################################################################################################################################
 #13. Discrete Fourier Transform Analysis
