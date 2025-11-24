@@ -531,19 +531,53 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #For genes
+
+#Get full genomes for cds extraction (3m35.115s)
+mkdir /media/aswin/SCFR/SCFR-main/genomes
+cd /media/aswin/SCFR/SCFR-main
+time while read i
+do
+genome=$(echo $i | awk '{print$1}')
+species=$(echo $i | awk '{print$2}')
+echo "-" 
+unzip -o $genome".zip" -d genomes
+mkdir genomes/$species
+mv genomes/ncbi_dataset/data/$genome/* genomes/$species/
+samtools faidx genomes/$species/GCA*.fna
+unset genome species
+done < QC/genome_accessions
+rm -r genomes/ncbi_dataset genomes/md5sum.txt genomes/README.md
+
+#Extract cds from genomes based on gtf
 mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
 cd /media/aswin/SCFR/SCFR-main
-#Get cds sequences from gtf
 start_time=$(date +%s)
+while read i
+do
+(
+species=$(echo $i | awk '{print$2}')
+genome=$(find genomes/$species -name "GCA*.fna")
+gtf=$(readlink -f genes/$species/GC*.gtf)
+echo -e ">"$species "\n -genome: "$genome"\n -GTF: "$gtf
+mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/$species
+gffread $gtf -g $genome -x /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/$species/${species}"_cds.fa"
+) &
+done < QC/genome_accessions
+wait
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#Get cds sequences from gtf
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 (
 echo ">"species
-chr=$(readlink -f chrs/$species)
 gtf=$(readlink -f genes/$species/GC*.gtf)
-echo " - " $chr $gtf
 mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/$species
-time gffread $gtf -g $chr -x /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/$species/${species}"_cds.fa"
+cat chrs/$species/*.fasta > chrs/$species/$species"_genome.fa"
+samtools faidx chrs/$species/$species"_genome.fa"
+time gffread $gtf -g chrs/$species/$species"_genome.fa" -x /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/$species/${species}"_cds.fa"
+rm chrs/$species/$species"_genome.fa"
 unset chr gtf
 ) &
 done
