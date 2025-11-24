@@ -401,7 +401,6 @@ time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorte
 #Fisher's test
 bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
 
-
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
 
@@ -464,7 +463,9 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#-----------------------------------------------------------------------------------------------------------
 #For easier visual inspection plot PCA without labels (2.46667 mins)
+
 mkdir /media/aswin/SCFR/SCFR-main/PCA_without_labels
 cd /media/aswin/SCFR/SCFR-main/
 cp -r PCA/* PCA_without_labels/
@@ -473,13 +474,13 @@ find PCA_without_labels/ -name "*.fasta" | xargs rm
 
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-echo ">"$species
-for win in 5000 7500 10000
-do
-Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/with_coding_region PCA_without_labels/"$species"/$win/with_coding_region
-Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/without_coding_region PCA_without_labels/"$species"/$win/without_coding_region
-done
+	do
+	echo ">"$species
+	for win in 5000 7500 10000
+	do
+	Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/with_coding_region PCA_without_labels/"$species"/$win/with_coding_region
+	Rscript my_scripts/plotPCA_without_labels.r PCA_without_labels/"$species"/$win/without_coding_region PCA_without_labels/"$species"/$win/without_coding_region
+	done
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
@@ -487,7 +488,9 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 ####################################################################################################################################################################################################################################################################################################################
 #13. Discrete Fourier Transform Analysis
 
-#For SCFRs
+#-----------------------------------------------------------------------------------------------------------
+#For SCFRs (for 5000, 7500 & 10000 - 72.8667 mins) (for 1000 & 2500 - )
+
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -514,12 +517,12 @@ echo " -"$win
 	for type in with_coding_region without_coding_region
 	do
 	cd Fourier_analysis/"$species"/"$win"/"$type"/
-	for scfr in $(ls *.fasta)
+	for scfr in $(find . -mindepth 1 -maxdepth 1 -name "*.fasta" | cut -f2 -d "/")
 	do
 	echo " -"$scfr
 	python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$scfr -t 32 $scfr
 	done
-  unset scfr
+	unset scfr
 	cd /media/aswin/SCFR/SCFR-main
 	done
 unset chr type
@@ -530,8 +533,109 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#-----------------------------------------------------------------------------------------------------------
 #For genes
 
+#Get GTF associated with genome
+mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+cat /media/aswin/SCFR/SCFR-main/QC/genome_accessions | xargs -n2 bash -c 'paste <(echo $1 $0) <(datasets summary genome accession $0 --as-json-lines | json2xml | xtract -pattern root -def "-" -element accession)' | column -t > genome_gtf_accessions
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+
+#Download cds from ncbi (21.9667 mins)
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+start_time=$(date +%s)
+while read i
+	do
+	species=$(echo $i | awk '{print$1}')
+	gtf=$(echo $i | awk '{print$NF}')
+	echo ">"$species $gtf
+	time datasets download genome accession $gtf --include cds --filename $gtf".zip"
+	unzip -o $gtf".zip" -d cds
+	mkdir $species
+	mv cds/ncbi_dataset/data/$gtf/cds_from_genomic.fna $species/$gtf"_cds.fa"
+	unset species gtf
+done < <(grep borangutan genome_gtf_accessions)
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+rm -r cds
+
+#Run fourier analysis of genes
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo ">"$species
+	cd Fourier_analysis/genes/$species
+	gene=$(ls | grep "GC.*_cds.fa")
+	python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$gene -t 32 $gene
+	cd /media/aswin/SCFR/SCFR-main
+	unset gene
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
+
+
+
+
+
+
+
+
+
+####################################################################################################################################################################################################################################################################################################################
+####################################################################################################################################################################################################################################################################################################################
+#DRAFT SCRIPTS
+####################################################################################################################################################################################################################################################################################################################
+
+#Download large genome files
+datasets download genome accession $genome --include genome,gtf,seq-report --dehydrated --filename $genome.zip
+unzip $genome.zip -d $genome
+time datasets rehydrate --directory $genome
+
+#Fourier ananlysis
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
+gzip -d GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
+python3 split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna .
+time python3 fft_motif_report_grouped.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o .
+python split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna CDS200
+python fft_motif_analysis.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o output_folder
+
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+cp -r ../PCA/* .
+find . -name "*.tsv" | xargs rm
+find . -name "*.pdf" | grep -v fft | xargs rm
+
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+for win in 1000 2500 5000 7500 10000
+cd $species/5000/without_coding_region/
+for scfr in $(ls *.fasta)
+do
+echo " -"$scfr
+time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$scfr -t 32 $scfr
+done
+unset scfr
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+##
+
+grep -v "^#" GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | awk '{for (i=1;i<=NF;i++) if($i ~/gene_biotype/) print $(i+1)}' | sort | uniq -c > annotation_types
+
+
+##
 #Get full genomes for cds extraction (3m35.115s)
 mkdir /media/aswin/SCFR/SCFR-main/genomes
 cd /media/aswin/SCFR/SCFR-main
@@ -584,52 +688,6 @@ done
 wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
-####################################################################################################################################################################################################################################################################################################################
-####################################################################################################################################################################################################################################################################################################################
-#DRAFT SCRIPTS
-####################################################################################################################################################################################################################################################################################################################
-
-#Download large genome files
-datasets download genome accession $genome --include genome,gtf,seq-report --dehydrated --filename $genome.zip
-unzip $genome.zip -d $genome
-time datasets rehydrate --directory $genome
-
-#Fourier ananlysis
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
-gzip -d GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna.gz
-python3 split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna .
-time python3 fft_motif_report_grouped.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o .
-python split_fasta_by_chunks.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna CDS200
-python fft_motif_analysis.py GCF_009914755.1_T2T-CHM13v2.0_cds_from_genomic.fna -o output_folder
-
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-cp -r ../PCA/* .
-find . -name "*.tsv" | xargs rm
-find . -name "*.pdf" | grep -v fft | xargs rm
-
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-echo ">"$species
-for win in 1000 2500 5000 7500 10000
-cd $species/5000/without_coding_region/
-for scfr in $(ls *.fasta)
-do
-echo " -"$scfr
-time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$scfr -t 32 $scfr
-done
-unset scfr
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis
-done
-end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
-echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
-##
-
-grep -v "^#" GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | awk '{for (i=1;i<=NF;i++) if($i ~/gene_biotype/) print $(i+1)}' | sort | uniq -c > annotation_types
 
 
 
