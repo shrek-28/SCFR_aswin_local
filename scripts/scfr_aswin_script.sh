@@ -487,6 +487,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 ####################################################################################################################################################################################################################################################################################################################
 #13. Discrete Fourier Transform Analysis
 
+#For SCFRs
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -529,11 +530,26 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-
+#For genes
+mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+cd /media/aswin/SCFR/SCFR-main
+#Get cds sequences from gtf
+start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
+(
 echo ">"species
-
+chr=$(readlink -f chrs/$species)
+gtf=$(readlink -f genes/$species/GC*.gtf)
+echo " - " $chr $gtf
+mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/$species
+time gffread $gtf -g $chr -x /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/$species/${species}"_cds.fa"
+unset chr gtf
+) &
+done
+wait
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
@@ -580,7 +596,6 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 ##
 
 grep -v "^#" GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | awk '{for (i=1;i<=NF;i++) if($i ~/gene_biotype/) print $(i+1)}' | sort | uniq -c > annotation_types
-
 
 
 
