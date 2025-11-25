@@ -347,7 +347,9 @@ do
 (
 echo $species
 bed=$(find genes/$species/ -name "GCF_*.bed")
+#SCFRs from both intronic & intergenic region
 python3 scripts/gene_desert_finder.py $bed --z 2 --out gene_deserts/$species"_intronic_intergenic"
+#SCFRs from only intergenic region
 python3 my_scripts/gene_desert_finder_intergenic.py $bed --z 2 --out gene_deserts/$species"_only_intergenic"
 ) &
 done
@@ -401,6 +403,20 @@ time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorte
 #Fisher's test
 bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
 
+cd /media/aswin/SCFR/SCFR-main
+/media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+  do
+  (
+  echo " -"$species
+  mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
+  for tsv in $(find gene_deserts/ -maxdepth 1 -mindepth 1 -name "$species*.tsv")
+  do
+  prefix=$(echo $tsv | sed 's/.tsv//g' | awk -F "/" '{print$NF}')
+  awk '!/start/ {print$1,$2,$3,$4}' OFS="\t" $tsv > gene_deserts/fishers_test/$species/$prefix".bed"
+  /media/aswin/programs/bedtools2-2.31.1/bin/bedtools fisher -a human_SCFR_atleast_10000.out -b human_only_intergenic_intergenic_regions.bed -g /media/aswin/SCFR/SCFR-main/genome_sizes/human.genome
+  
+
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
 
@@ -411,7 +427,7 @@ for win in 100 500 1000 2500 5000 7500 10000
 do
 echo ">"$win
 mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
-  for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
   (
   echo " -"$species
@@ -421,7 +437,7 @@ mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
   #Get SCFRs that don't overlap with coding genes
   bedtools intersect -v -a SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" -b $cds | awk '{print$1,$2,$3,$4,$3-$2}' OFS="\t" > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed"
   ) &
-  done
+done
 wait
 unset species cds
 done
@@ -563,7 +579,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 rm -r cds
 
-#Run fourier analysis of genes
+#Run fourier analysis of genes (474.25)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -578,7 +594,14 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-
+#human genes failed to finish & no pdf was generated, likely due to large number of fasta in single file
+#Split human cds fasta into 2 equal parts & run fourier seperately on both
+mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/split_human
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/split_human
+cp ../human/GCF_009914755.1_cds.fa .
+seqkit split -p 2 GCF_009914755.1_cds.fa
+cd GCF_009914755.1_cds.fa.split/
+time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o output_GCF_009914755.1_cds.part_001.fa -t 32 GCF_009914755.1_cds.part_001.fa
 
 
 
