@@ -466,9 +466,8 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-
 ####################################################################################################################################################################################################################################################################################################################
-#Get window-wise summary of SCFR count and length & it's overlap with whole genome & cds from all species 
+#Get window-wise summary of SCFR count and length & it's overlap with whole genome & cds from all species (99.3667 mins)
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
