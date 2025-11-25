@@ -26,10 +26,11 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   mkdir -p SCFR_lists
   mkdir -p Fourier_analysis
   mkdir -p gene_deserts
+  mkdir -p SCFR_summaries
 done
 
 #mkdir github
-#mv SCFR_lists PCA github/
+#mv SCFR_lists PCA mv SCFR_summaries github/
 
 #List of genomic accesions for analysis
 echo -e "GCA_009914755.4\thuman\nGCA_028858775.3\tchimpanzee\nGCA_029289425.3\tbonobo\nGCA_028878055.3\tgibbon\nGCA_029281585.3\tgorilla\nGCA_028885625.3\tborangutan\nGCA_028885655.3\tsorangutan" > QC/genome_accessions
@@ -117,6 +118,7 @@ done | awk '{if($2==$5) print$0,"same"; else print$0,"different"}' |  sed '1i nc
 
 #4.1. Identify SCFRs (51.6833 mins)
 cd /media/aswin/SCFR/SCFR-main
+
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
@@ -174,6 +176,11 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 unset max_jobs
 
+ls | egrep "_SCFR_all_frame_summary_by_chromosome|_SCFR_all_frame_summary_all" | xargs -n1 sh -c 'mv $0 SCFR_summaries/'
+cd /media/aswin/SCFR/SCFR-main/SCFR_summaries
+ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep -v Chromosome $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_all_frame_summary_all.csv//g' | tr "," " " | tr -d '"' | sed '1i Species Chromosome Frame N Min Q1 Median Mean Q3 Max SD P95 P99 Q_1Kb Q_5Kb Q_10Kb' > all_species_chromsome_frame_wise_summary
+ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep ALL $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_all_frame_summary_all.csv//g' | tr "," " " | tr -d '"' | sed '1i Species Chromosome Frame N Min Q1 Median Mean Q3 Max SD P95 P99 Q_1Kb Q_5Kb Q_10Kb' > all_species_frame_wise_summary
+
 #########################################################################################################################
 #5. Strand assymetry
 
@@ -218,6 +225,10 @@ done
 wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+cd /media/aswin/SCFR/SCFR-main/SCFR_all
+ls | grep "_SCFR_asymmetries_out.csv" | xargs -n1 sh -c 'grep ALL $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_asymmetries_out.csv//g' | tr "," " " | tr -d '"' \
+| sed '1i Species chrom f_count r_count strand_count_asym f_length r_length strand_length_asym frame1_count frame1_length frame2_count frame2_length frame3_count frame3_length frame-1_count frame-1_length frame-2_count frame-2_length frame-3_count frame-3_length' > all_species_SCFR_asymmetries
 
 ##################################################################################################################################################################################################################################################
 #6. get GC content of the SCFRs (48.1667)
