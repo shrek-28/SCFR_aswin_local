@@ -727,5 +727,60 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+####################################################################
+#get length stats of all scfrs
+
+time for scfr in $(ls | grep "_SCFR_all.out")
+do
+echo ">"$scfr
+python3 all_scfr_stats.py $scfr > "length_stats_"$scfr
+done
+
+####################################################################
+#Window wise all species scfr cds stats
+
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+genome_size=$(awk '{a+=$2} END{print a}' /media/aswin/SCFR/SCFR-main/genome_sizes/$species".genome")
+#cds
+cd /media/aswin/SCFR/SCFR-main/genes/$species
+cds=$(ls | grep "GC.*.bed")
+#merge cds
+	sort -k1,1V -k2,2n $cds | /media/aswin/programs/bedtools2-2.31.1/bin/bedtools merge -i - > $species"_cds_merged.bed"
+merged_cds_len=$(awk '{print$3-$2}' $species"_cds_merged.bed" | awk '{a+=$1} END{print a}')
+#scfr
+cd /media/aswin/SCFR/SCFR-main/SCFR_lists
+for win in 100 500 1000 2500 5000 7500 10000
+do
+cd $win
+#get stats
+	all_scfr=$(ls | grep $species"_SCFR_atleast_"$win".out")
+	noncoding_scfr=$(ls | grep $species"_SCFR_atleast_"$win"_in_non_coding.bed")
+	all_count=$(wc -l $all_scfr | awk '{print$1}')
+	noncoding_count=$(wc -l $noncoding_scfr | awk '{print$1}')
+	all_len=$(awk '{print$3-$2}' $all_scfr | awk '{a+=$1} END{print a}')
+	noncoding_len=$(awk '{print$3-$2}' $noncoding_scfr | awk '{a+=$1} END{print a}')
+	all_merged_len=$(/media/aswin/programs/bedtools2-2.31.1/bin/bedtools merge -i $all_scfr | awk '{print$3-$2}' | awk '{a+=$1} END{print a}')
+	noncoding_merged_len=$(/media/aswin/programs/bedtools2-2.31.1/bin/bedtools merge -i $noncoding_scfr | awk '{print$3-$2}' | awk '{a+=$1} END{print a}')
+#merge csfr
+	sort -k1,1V -k2,2n /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"/"$all_scfr" | /media/aswin/programs/bedtools2-2.31.1/bin/bedtools merge -i - > /media/aswin/SCFR/SCFR-main/genes/$species/$species"_scfr_atleast_"$win"_merged.bed"
+#get percentages
+	per_genome_by_scfr=$(calc $all_merged_len / $genome_size | tr -d "~" | awk '{print$1*100}')
+	merged_scfr_len=$(awk '{print$3-$2}' /media/aswin/SCFR/SCFR-main/genes/$species/$species"_scfr_atleast_"$win"_merged.bed" | awk '{a+=$1} END{print a}')
+	scfr_cds_overlap=$(/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a /media/aswin/SCFR/SCFR-main/genes/$species/$species"_scfr_atleast_"$win"_merged.bed" -b /media/aswin/SCFR/SCFR-main/genes/$species/$species"_cds_merged.bed" | awk '{print$3-$2}' | awk '{a+=$1} END{print a}')
+	per_scfr_by_coding=$(calc $scfr_cds_overlap / $all_merged_len | tr -d "~" | awk '{print$1*100}')
+scfr=$(echo $species $win $all_count $noncoding_count $all_len $noncoding_len $all_merged_len $noncoding_merged_len $genome_size $per_genome_by_scfr $merged_cds_len $scfr_cds_overlap $per_scfr_by_coding)
+echo $scfr
+unset all_scfr noncoding_scfr all_count noncoding_count all_len noncoding_len all_merged_len noncoding_merged_len per_genome_by_scfr merged_scfr_len scfr_cds_overlap per_scfr_by_coding 
+cd /media/aswin/SCFR/SCFR-main/SCFR_lists
+done
+unset genome_size win merged_cds_len
+cd /media/aswin/SCFR/SCFR-main
+done | sed '1i Species Window Total_No_SCFR Total_No_noncoding_SCFR Total_length_SCFR Total_length_noncoding_SCFR Merged_length_SCFR Merged_length_noncoding_SCFR Genome_size Percent_genome_by_SCFR Merged_CDS_length SCFR_CDS_overlap Percent_SCFR_by_coding' > /media/aswin/SCFR/SCFR-main/SCFR_summaries/window_wise_all_species_scfr_coding_stats
+wait
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e > runtime_window_wise_all_species_scfr_coding_stats
 
 
