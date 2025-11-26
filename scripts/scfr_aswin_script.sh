@@ -515,6 +515,16 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e > /media/aswin/SCFR/SCFR-main/SCFR_summaries/runtime_window_wise_all_species_scfr_coding_stats
 
+#Get coding gene length stats of species
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+gene_length_stats=$(myfasta -l $species/GC*_cds.fa | awk '{print$NF}' | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g')
+echo $species $gene_length_stats
+unset species gene_length_stats
+done | column -t > gene_length_stats
+
 
 ####################################################################################################################################################################################################################################################################################################################
 #12. Quantification of codon usage patterns and PCA (10.7167 mins)
