@@ -192,6 +192,7 @@ ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep ALL $0 | sed
 #Plot data
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
+plot_all_species_SCFR_length_stats.R 
 window_wise_all_species_scfr_coding_stats.csv
 
 
