@@ -189,6 +189,11 @@ cd /media/aswin/SCFR/SCFR-main/SCFR_summaries
 ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep -v Chromosome $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_all_frame_summary_all.csv//g' | tr "," " " | tr -d '"' | sed '1i Species Chromosome Frame N Min Q1 Median Mean Q3 Max SD P95 P99 Q_1Kb Q_5Kb Q_10Kb' > all_species_chromsome_frame_wise_summary
 ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep ALL $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_all_frame_summary_all.csv//g' | tr "," " " | tr -d '"' | sed '1i Species Chromosome Frame N Min Q1 Median Mean Q3 Max SD P95 P99 Q_1Kb Q_5Kb Q_10Kb' > all_species_frame_wise_summary
 
+#Make SCFR length stats plot
+#NOTE: Rename species common names before plotting
+cd /media/aswin/SCFR/SCFR-main/SCFR_all
+Rscript /media/aswin/SCFR/SCFR-main/my_scripts/plot_all_species_SCFR_length_stats.R all_scfr_length_stats.tsv all_scfr_length_stats.pdf
+
 #########################################################################################################################
 #5. Strand assymetry
 
@@ -514,6 +519,9 @@ done | sed '1i Species Window Total_No_SCFR Total_No_noncoding_SCFR Total_length
 wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e > /media/aswin/SCFR/SCFR-main/SCFR_summaries/runtime_window_wise_all_species_scfr_coding_stats
+
+#Plot SCFR count & length stats & percent in genome & cds 
+awk -F "," '{print$1,$2,($3-$4),$4,$3,$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | tr "," " " | awk 'NR==1{$3="Total_No_coding_SCFR"}1' | tr " " "," > filtered_window_wise_all_species_scfr_coding_stats.csv
 
 #Get coding gene length stats of species
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
