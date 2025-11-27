@@ -521,7 +521,8 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e > /media/aswin/SCFR/SCFR-main/SCFR_summaries/runtime_window_wise_all_species_scfr_coding_stats
 
 #Plot SCFR count & length stats & percent in genome & cds 
-awk -F "," '{print$1,$2,($3-$4),$4,$3,$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | tr "," " " | awk 'NR==1{$3="Total_No_coding_SCFR"}1' | tr " " "," > filtered_window_wise_all_species_scfr_coding_stats.csv
+awk -F "," '{print$1,$2,(($3-$4)/$3*100),($4/$3*100),$3,$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | awk 'BEGIN{FS=OFS=","} NR==1{$3="Percent_coding_SCFR"; $4="Percent_noncoding_SCFR"}1' | tr " " "," > filtered_window_wise_all_species_scfr_coding_stats.csv
+awk -F "," 'NR>1{print$1,$2,$3,(($3-$4)/$3*100),($4/$3*100),$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | sed '1i Species,Window,Total_No_SCFR,Percent_coding_SCFR_count,Percent_noncoding_SCFR_count,Percent_unfiltered_by_filtered_SCFR,Percent_genome_by_SCFR,Percent_SCFR_by_coding' | sed 's/ /,/g' > filtered_window_wise_all_species_scfr_coding_stats.csv
 
 #Get coding gene length stats of species
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
