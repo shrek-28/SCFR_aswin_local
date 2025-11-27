@@ -195,7 +195,6 @@ do
 plot_all_species_SCFR_length_stats.R 
 window_wise_all_species_scfr_coding_stats.csv
 
-
 #Make SCFR length stats plot
 #NOTE: Rename species common names before plotting
 cd /media/aswin/SCFR/SCFR-main/SCFR_all
@@ -530,6 +529,14 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #Plot SCFR count & length stats & percent in genome & cds 
 awk -F "," '{print$1,$2,(($3-$4)/$3*100),($4/$3*100),$3,$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | awk 'BEGIN{FS=OFS=","} NR==1{$3="Percent_coding_SCFR"; $4="Percent_noncoding_SCFR"}1' | tr " " "," > filtered_window_wise_all_species_scfr_coding_stats.csv
 awk -F "," 'NR>1{print$1,$2,$3,(($3-$4)/$3*100),($4/$3*100),$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | sed '1i Species,Window,Total_No_SCFR,Percent_coding_SCFR_count,Percent_noncoding_SCFR_count,Percent_unfiltered_by_filtered_SCFR,Percent_genome_by_SCFR,Percent_SCFR_by_coding' | sed 's/ /,/g' > filtered_window_wise_all_species_scfr_coding_stats.csv
+
+mkdir SCFR_summaries/plot_all_species_SCFR_count_length_percent_with_genome_and_cds
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+cat SCFR_summaries/filtered_window_wise_all_species_scfr_coding_stats.csv | egrep "$species|Window" > "temp_"$species".csv"
+Rscript my_scripts/plot_all_species_SCFR_count_length_percent_with_genome_and_cds.R "temp_"$species".csv" SCFR_summaries/plot_all_species_SCFR_count_length_percent_with_genome_and_cds/$species"_plot_all_species_SCFR_count_length_percent_with_genome_and_cds.pdf"
+done
 
 #Get coding gene length stats of species
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
