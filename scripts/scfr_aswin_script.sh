@@ -692,6 +692,7 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 	echo ">"$species
 	cd Fourier_analysis/genes/$species
 	gene=$(ls | grep "GC.*_cds.fa")
+	
 	python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$gene -t 32 $gene
 	cd /media/aswin/SCFR/SCFR-main
 	unset gene
