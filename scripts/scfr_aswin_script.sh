@@ -548,7 +548,6 @@ echo $species $gene_length_stats
 unset species gene_length_stats
 done | column -t > gene_length_stats
 
-
 ####################################################################################################################################################################################################################################################################################################################
 #12. Quantification of codon usage patterns and PCA (10.7167 mins)
 
@@ -684,6 +683,17 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 rm -r cds
 
+#The code for fourier don't work for very short sequences; hence check length stats of cds
+#Check gene cds length stats
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+time for seq in $(find . -mindepth 2 -maxdepth 2 -name "GCF_*_cds.fa")
+do
+id=$(echo $seq | awk -F / '{print$2,$3}' | sed 's/_cds.fa//g')
+stat=$(myfasta -l $seq | awk '{print$NF}' | ministat -n | tail -1 | sed 's/^x//g' | sed 's/[ ]\+/ /g' | sed 's/^ //g')
+echo $id $stat
+unset id stat
+done | sed '1i Species annotation N Min Max Median Avg Stddev' | column -t > annotation_length_stats
+
 #Run fourier analysis of genes (474.25)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -692,27 +702,13 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 	echo ">"$species
 	cd Fourier_analysis/genes/$species
 	gene=$(ls | grep "GC.*_cds.fa")
-	
+	if [[ $species == human ]]; then seqtk seq -L 30 $gene > $gene"_filtered.fa"; gene=$(ls | grep "_filtered.fa"); else :; fi
 	python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o "output_"$gene -t 32 $gene
 	cd /media/aswin/SCFR/SCFR-main
 	unset gene
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
-#human genes failed to finish & no pdf was generated, likely due to large number of fasta in single file
-#Split human cds fasta into 2 equal parts & run fourier seperately on both
-mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/split_human
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes/split_human
-cp ../human/GCF_009914755.1_cds.fa .
-seqkit split -p 2 GCF_009914755.1_cds.fa
-cd GCF_009914755.1_cds.fa.split/
-time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o output_GCF_009914755.1_cds.part_001.fa -t 32 GCF_009914755.1_cds.part_001.fa
-
-
-
-
-
 
 
 
