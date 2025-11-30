@@ -349,7 +349,7 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#Plot a 2 dimensional histogram of length vs AT content and label the SCFR longer than 10 Kb that overlap coding exons
+#Find genes intersecting with long SCFRs
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -364,9 +364,17 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-cp scripts/combined_2dhist.r SCFR_all
-cd SCFR_all
-Rscript combined_2dhist.r
+#Plot a 2 dimensional histogram of length vs AT content and label the SCFR longer than 10 Kb that overlap coding exons
+Rscript scripts/combined_2dhist.r
+
+#Get the sum of all SCFR counts across all length bins for each GC bins (12.5333 mins)
+cd /media/aswin/SCFR/SCFR-main/SCFR_all
+for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human
+do
+awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_bins.out | sort -k1,1V
+done | column -t > all_species_GC_total_SCFR_count_across_all_length_bins
+
+
 
 #########################################################################################################################
 #10. Gene deserts
