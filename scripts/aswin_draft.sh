@@ -14,16 +14,60 @@ cp /media/aswin/SCFR/SCFR-main/genome_sizes/$species".genome" .
 
 ##########
 #View SCFR length filtered summary in window-wise
+for i in $(awk -F "," '{print$2}' window_wise_all_species_scfr_coding_stats.csv | grep -v Window | sort -u)
+do
+j=$(for s in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+awk -F "," -v a="$i" '$2==a {print$1,$3}' filtered_window_wise_all_species_scfr_coding_stats.csv | grep $s | awk '{print$2}'
+done)
+echo $i $j
+unset j
+done | sort -k1,1n | sed '1i Window human bonobo chimpanzee gorilla borangutan sorangutan gibbon' | \
+awk 'NR==1{print; next} {for(i=2;i<=NF;i++) {if($i>=100000) {$i=sprintf("%.2fm",$i/1000000)} else if($i>=1000) {$i=sprintf("%.2fk",$i/1000)} else {$i=sprintf("%.0f",$i)}} print}' OFS="\t" | column -t > length_threshold_total_scfr_count_summary
 
 for i in $(awk -F "," '{print$2}' window_wise_all_species_scfr_coding_stats.csv | grep -v Window | sort -u)
 do
 j=$(for s in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
-awk -F "," -v a="$i" '$2==a {print$1,$3}' window_wise_all_species_scfr_coding_stats.csv | grep $s | awk '{print$2}'
+awk -F "," -v a="$i" '$2==a {print$1,$7}' filtered_window_wise_all_species_scfr_coding_stats.csv | grep $s | awk '{print$2}'
 done)
 echo $i $j
 unset j
-done | sed '1i Window human bonobo chimpanzee gorilla borangutan sorangutan gibbon' | awk 'NR==1 {print; next} {for(i=2;i<=NF;i++) $i=$i/1000000; print}' OFS="\t" | column -t
+done | sort -k1,1n | sed '1i Window human bonobo chimpanzee gorilla borangutan sorangutan gibbon' | column -t > length_threshold_Percent_genome_covered_by_SCFR_summary
+
+for i in $(awk -F "," '{print$2}' window_wise_all_species_scfr_coding_stats.csv | grep -v Window | sort -u)
+do
+j=$(for s in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+awk -F "," -v a="$i" '$2==a {print$1,$6}' filtered_window_wise_all_species_scfr_coding_stats.csv | grep $s | awk '{print$2}'
+done)
+echo $i $j
+unset j
+done | sort -k1,1n | sed '1i Window human bonobo chimpanzee gorilla borangutan sorangutan gibbon' | column -t > length_threshold_Percent_unfiltered_by_filtered_SCFR_summary
+
+for i in $(awk -F "," '{print$2}' window_wise_all_species_scfr_coding_stats.csv | grep -v Window | sort -u)
+do
+j=$(for s in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+awk -F "," -v a="$i" '$2==a {print$1,$8}' filtered_window_wise_all_species_scfr_coding_stats.csv | grep $s | awk '{print$2}'
+done)
+echo $i $j
+unset j
+done | sort -k1,1n | sed '1i Window human bonobo chimpanzee gorilla borangutan sorangutan gibbon' | column -t > length_threshold_Percent_SCFR_by_coding_summary
+
+for i in $(awk -F "," '{print$2}' window_wise_all_species_scfr_coding_stats.csv | grep -v Window | sort -u)
+do
+j=$(for s in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+awk -F "," -v a="$i" '$2==a {print$1,$13}' window_wise_all_species_scfr_coding_stats.csv | grep $s | awk '{print$2}'
+done)
+echo $i $j
+unset j
+done | sort -k1,1n | sed '1i Window human bonobo chimpanzee gorilla borangutan sorangutan gibbon' \
+| awk 'NR==1{print; next} {for(i=2;i<=NF;i++) {if($i>=100000) {$i=sprintf("%.2fm",$i/1000000)} else if($i>=1000) {$i=sprintf("%.2fk",$i/1000)} else {$i=sprintf("%.0f",$i)}} print}' OFS="\t" | column -t > length_threshold_SCFR_cds_overlap_summary
+
+
+cat length_threshold_percent_genome_covered_summary | sed -n 4p | awk '!($1="")' | tr " " "\n" | awk NF | sort -r
 
 #View higher strand asymmetry
 sed 's/ /_/g' genome_reports/GCA_029289425.3_bonobo.tsv | awk -F"\t" -v OFS="\t" '{ for(N=1; N<=NF; N++) if($N=="") $N="-" } 1' | awk '{print$9,$3,$4,$5,$11}' | sort -k5,5n | colnum.sh 
