@@ -444,7 +444,7 @@ done
 #Plot data
 cd /media/aswin/SCFR/SCFR-main/
 python3 compute_desert_stats.py gene_deserts/*.bed
-Rscript plot_gene_desert_stats_2.r all_desert_lengths.tsv
+Rscript plot_gene_desert_stats.r all_desert_lengths.tsv
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------
 #10.3. Fishers test
