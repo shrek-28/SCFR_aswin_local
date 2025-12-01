@@ -369,10 +369,15 @@ Rscript scripts/combined_2dhist.r
 
 #Get the sum of all SCFR counts across all length bins for each GC bins (12.5333 mins)
 cd /media/aswin/SCFR/SCFR-main/SCFR_all
-for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human
-do
-awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_bins.out | sort -k1,1V
-done | column -t > all_species_GC_total_SCFR_count_across_all_length_bins
+for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_GC_bins.out | sort -k1,1 -k2,2n; done | column -t > GC_all_species_total_SCFR_count_across_all_length_bins
+for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_AT_bins.out | sort -k1,1 -k2,2n; done | column -t > AT_all_species_total_SCFR_count_across_all_length_bins
+for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$1]+=$3} END{for(len in counts)print a,len, counts[len]}' ${species}_GC_bins.out | sort -k1,1 -k2,2n; done | column -t > GC_all_species_total_SCFR_count_across_all_GC_bins
+for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$1]+=$3} END{for(len in counts)print a,len, counts[len]}' ${species}_AT_bins.out | sort -k1,1 -k2,2n; done | column -t > AT_all_species_total_SCFR_count_across_all_AT_bins
+
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species GC_all_species_total_SCFR_count_across_all_length_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species AT_all_species_total_SCFR_count_across_all_length_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species GC_all_species_total_SCFR_count_across_all_GC_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species AT_all_species_total_SCFR_count_across_all_AT_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
 
 
 #########################################################################################################################
