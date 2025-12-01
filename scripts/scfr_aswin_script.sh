@@ -319,6 +319,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #########################################################################################################################
 #9. Bin the SCFR counts by length and GC content
 
+#FOr AT
 cd /media/aswin/SCFR/SCFR-main/SCFR_all
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -327,6 +328,19 @@ do
 echo $species
 #For AT
 cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $5}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_AT_bins.out
+) &
+done
+wait
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#For GC
+cd /media/aswin/SCFR/SCFR-main/SCFR_all
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+(
+echo $species
 #For GC
 cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $6}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_GC_bins.out
 ) &
@@ -359,7 +373,6 @@ for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human
 do
 awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_bins.out | sort -k1,1V
 done | column -t > all_species_GC_total_SCFR_count_across_all_length_bins
-
 
 
 #########################################################################################################################
@@ -430,19 +443,34 @@ time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorte
 #Fisher's test
 bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
 
+#Run fisheers test (5 secs)
+mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test
+
 cd /media/aswin/SCFR/SCFR-main
-/media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test
+start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-  do
-  (
-  echo " -"$species
-  mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
-  for tsv in $(find gene_deserts/ -maxdepth 1 -mindepth 1 -name "$species*.tsv")
-  do
-  prefix=$(echo $tsv | sed 's/.tsv//g' | awk -F "/" '{print$NF}')
-  awk '!/start/ {print$1,$2,$3,$4}' OFS="\t" $tsv > gene_deserts/fishers_test/$species/$prefix".bed"
-  /media/aswin/programs/bedtools2-2.31.1/bin/bedtools fisher -a human_SCFR_atleast_10000.out -b human_only_intergenic_intergenic_regions.bed -g /media/aswin/SCFR/SCFR-main/genome_sizes/human.genome
-  
+do
+echo " -"$species
+mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
+for tsv in $(find gene_deserts/ -maxdepth 1 -mindepth 1 -name "$species*.tsv")
+do
+prefix=$(echo $tsv | sed 's/.tsv//g' | awk -F "/" '{print$NF}')
+echo " -"$prefix
+awk '!/start/ {print$1,$2,$3,$4}' OFS="\t" $tsv > gene_deserts/fishers_test/$species/$prefix".bed"
+for scfr in $(find /media/aswin/SCFR/SCFR-main/SCFR_lists/ -name "${species}_SCFR_atleast_*.out" | egrep -v "atleast_0.out|atleast_100.out")
+do
+(
+name=$(echo $scfr | awk -F "/" '{print$NF}')
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools fisher -a $scfr -b gene_deserts/fishers_test/$species/$prefix".bed" -g /media/aswin/SCFR/SCFR-main/genome_sizes/$species".genome" > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species/$name"_"$prefix".out"
+) &
+done
+wait
+unset scfr name
+done
+unset tsv prefix
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
