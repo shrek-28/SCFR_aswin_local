@@ -231,7 +231,7 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#5.3. Get summary & plot (6 secs)
+#5.3. Get window based strand asymmetry (6 secs)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -319,35 +319,35 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #########################################################################################################################
 #9. Bin the SCFR counts by length and GC content
 
-#FOr AT
-cd /media/aswin/SCFR/SCFR-main/SCFR_all
-start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-(
-echo $species
-#For AT
-cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $5}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_AT_bins.out
-) &
-done
-wait
-end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
-echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+#For AT (19.7833 mins)
+	cd /media/aswin/SCFR/SCFR-main/SCFR_all
+	start_time=$(date +%s)
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	(
+	echo $species
+	#For AT
+	cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $5}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_AT_bins.out
+	) &
+	done
+	wait
+	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+	echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#For GC
-cd /media/aswin/SCFR/SCFR-main/SCFR_all
-start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-(
-echo $species
-#For GC
-cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $6}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_GC_bins.out
-) &
-done
-wait
-end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
-echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+#For GC (17.9833 mins)
+	cd /media/aswin/SCFR/SCFR-main/SCFR_all
+	start_time=$(date +%s)
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	(
+	echo $species
+	#For GC
+	cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $6}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_GC_bins.out
+	) &
+	done
+	wait
+	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+	echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #Find genes intersecting with long SCFRs
 cd /media/aswin/SCFR/SCFR-main
@@ -367,20 +367,29 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #Plot a 2 dimensional histogram of length vs AT content and label the SCFR longer than 10 Kb that overlap coding exons
 Rscript scripts/combined_2dhist.r
 
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Summaries
+
 #Get the sum of all SCFR counts across all length bins for each GC bins (12.5333 mins)
-cd /media/aswin/SCFR/SCFR-main/SCFR_all
-for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_GC_bins.out | sort -k1,1 -k2,2n; done | column -t > GC_all_species_total_SCFR_count_across_all_length_bins
-for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_AT_bins.out | sort -k1,1 -k2,2n; done | column -t > AT_all_species_total_SCFR_count_across_all_length_bins
-for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$1]+=$3} END{for(len in counts)print a,len, counts[len]}' ${species}_GC_bins.out | sort -k1,1 -k2,2n; done | column -t > GC_all_species_total_SCFR_count_across_all_GC_bins
-for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$1]+=$3} END{for(len in counts)print a,len, counts[len]}' ${species}_AT_bins.out | sort -k1,1 -k2,2n; done | column -t > AT_all_species_total_SCFR_count_across_all_AT_bins
+	cd /media/aswin/SCFR/SCFR-main/SCFR_all
+	for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_GC_bins.out | sort -k1,1 -k2,2n; done | column -t > GC_all_species_total_SCFR_count_across_all_length_bins
+	for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$2]+=$3} END{for(gc in counts)print a,gc, counts[gc]}' ${species}_AT_bins.out | sort -k1,1 -k2,2n; done | column -t > AT_all_species_total_SCFR_count_across_all_length_bins
+	for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$1]+=$3} END{for(len in counts)print a,len, counts[len]}' ${species}_GC_bins.out | sort -k1,1 -k2,2n; done | column -t > GC_all_species_total_SCFR_count_across_all_GC_bins
+	for species in bonobo borangutan chimpanzee gibbon gorilla sorangutan human; do awk -v a="$species" '{counts[$1]+=$3} END{for(len in counts)print a,len, counts[len]}' ${species}_AT_bins.out | sort -k1,1 -k2,2n; done | column -t > AT_all_species_total_SCFR_count_across_all_AT_bins
 
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species GC_all_species_total_SCFR_count_across_all_length_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species AT_all_species_total_SCFR_count_across_all_length_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species GC_all_species_total_SCFR_count_across_all_GC_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species AT_all_species_total_SCFR_count_across_all_AT_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+#Print %GC or %AT & SCFR length bins where peak (highest SCFR count) is found
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species GC_all_species_total_SCFR_count_across_all_length_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species AT_all_species_total_SCFR_count_across_all_length_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species GC_all_species_total_SCFR_count_across_all_GC_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon; do max=$(grep $species AT_all_species_total_SCFR_count_across_all_AT_bins | sort -k3,3nr | head -1); echo $species $max; done | column -t
+
+#Print number of genes overlapping long SCFRs in each species
+	wc -l *_genes_of_interest.txt  | sort -k1n
+#Print number of MUC gene members per species
+	for i in $(ls | grep "_genes_of_interest.txt"); do j=$(grep MUC -i $i -c); echo $i $j; unset j; done | column -t
 
 
-#########################################################################################################################
+#######################################################################################################################################################################################################################################################################################################
 #10. Gene deserts
 
 #10.1. Identify gene deserts (1 min)
@@ -389,14 +398,14 @@ cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
-(
-echo $species
-bed=$(find genes/$species/ -name "GCF_*.bed")
-#SCFRs from both intronic & intergenic region
-python3 scripts/gene_desert_finder.py $bed --z 2 --out gene_deserts/$species"_intronic_intergenic"
-#SCFRs from only intergenic region
-python3 my_scripts/gene_desert_finder_intergenic.py $bed --z 2 --out gene_deserts/$species"_only_intergenic"
-) &
+	(
+	echo $species
+	bed=$(find genes/$species/ -name "GCF_*.bed")
+	#SCFRs from both intronic & intergenic region
+	python3 scripts/gene_desert_finder.py $bed --z 2 --out gene_deserts/$species"_intronic_intergenic"
+	#SCFRs from only intergenic region
+	python3 my_scripts/gene_desert_finder_intergenic.py $bed --z 2 --out gene_deserts/$species"_only_intergenic"
+	) &
 done
 wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
@@ -455,24 +464,24 @@ cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
-echo " -"$species
-mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
-for tsv in $(find gene_deserts/ -maxdepth 1 -mindepth 1 -name "$species*.tsv")
-do
-prefix=$(echo $tsv | sed 's/.tsv//g' | awk -F "/" '{print$NF}')
-echo " -"$prefix
-awk '!/start/ {print$1,$2,$3,$4}' OFS="\t" $tsv > gene_deserts/fishers_test/$species/$prefix".bed"
-for scfr in $(find /media/aswin/SCFR/SCFR-main/SCFR_lists/ -name "${species}_SCFR_atleast_*.out" | egrep -v "atleast_0.out|atleast_100.out")
-do
-(
-name=$(echo $scfr | awk -F "/" '{print$NF}')
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools fisher -a $scfr -b gene_deserts/fishers_test/$species/$prefix".bed" -g /media/aswin/SCFR/SCFR-main/genome_sizes/$species".genome" > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species/$name"_"$prefix".out"
-) &
-done
-wait
-unset scfr name
-done
-unset tsv prefix
+	echo " -"$species
+	mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
+	for tsv in $(find gene_deserts/ -maxdepth 1 -mindepth 1 -name "$species*.tsv")
+	do
+	prefix=$(echo $tsv | sed 's/.tsv//g' | awk -F "/" '{print$NF}')
+	echo " -"$prefix
+	awk '!/start/ {print$1,$2,$3,$4}' OFS="\t" $tsv > gene_deserts/fishers_test/$species/$prefix".bed"
+	for scfr in $(find /media/aswin/SCFR/SCFR-main/SCFR_lists/ -name "${species}_SCFR_atleast_*.out" | egrep -v "atleast_0.out|atleast_100.out")
+	do
+	(
+	name=$(echo $scfr | awk -F "/" '{print$NF}')
+	/media/aswin/programs/bedtools2-2.31.1/bin/bedtools fisher -a $scfr -b gene_deserts/fishers_test/$species/$prefix".bed" -g /media/aswin/SCFR/SCFR-main/genome_sizes/$species".genome" > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species/$name"_"$prefix".out"
+	) &
+	done
+	wait
+	unset scfr name
+	done
+	unset tsv prefix
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
