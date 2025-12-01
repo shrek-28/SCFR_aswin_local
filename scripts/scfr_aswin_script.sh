@@ -319,30 +319,16 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #########################################################################################################################
 #9. Bin the SCFR counts by length and GC content
 
-cd /media/aswin/SCFR/SCFR-main
 cd /media/aswin/SCFR/SCFR-main/SCFR_all
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 (
 echo $species
-cat "$species"_SCFR_GC_all.out|awk '{printf "%s %.2f\n", $13, $5}' |sed 's/ /\t/g'|awk '{
-  if ($1 < 1000)
-    bin1 = int($1 / 100) * 100;
-  else
-    bin1 = int($1 / 1000) * 1000;
-
-  bin2 = sprintf("%.1f", int($2 * 10) / 10);
-
-  count[bin1, bin2]++;
-  range[bin1] = ($1 < 1000) ? 100 : 1000;
-} END {
-  for (key in count) {
-    split(key, bins, SUBSEP);
-    r = range[bins[1]];
-    printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key];
-  }
-}' > "$species"_bins.out
+#For AT
+cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $5}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_AT_bins.out
+#For GC
+cat "$species"_SCFR_GC_all.out | awk '{printf "%s %.2f\n", $13, $6}' | sed 's/ /\t/g' |awk ' { if ($1 < 1000) bin1 = int($1 / 100) * 100; else bin1 = int($1 / 1000) * 1000; bin2 = sprintf("%.1f", int($2 * 10) / 10); count[bin1, bin2]++; range[bin1] = ($1 < 1000) ? 100 : 1000; } END { for (key in count) { split(key, bins, SUBSEP); r = range[bins[1]]; printf "%d-%d\t%s-%s\t%d\n", bins[1], bins[1]+r-1, bins[2], sprintf("%.1f", bins[2]+0.1), count[key]; } } ' > "$species"_GC_bins.out
 ) &
 done
 wait
