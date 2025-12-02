@@ -735,8 +735,27 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#Get species-wise summary
+cd /media/aswin/SCFR/SCFR-main
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+cd Fourier_analysis/$species
+for len in 5000 7500 10000
+do
+for tsv in $(find $len -name "summary.tsv" -type f)
+do
+chr=$(echo $tsv | cut -f3 -d "/" | cut -f2,3 -d "_" | sed 's/\.fasta//g')
+grep -v "Num_Raw_Peaks" $tsv | sed "s/^/$len\t$chr\t/g"
+unset chr
+done
+unset tsv
+done | column -t > all_length_thresholds_fourier_summary
+unset len
+cd /media/aswin/SCFR/SCFR-main
+done
 
-
+#-----------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------
 #For genes
 
