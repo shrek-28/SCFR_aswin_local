@@ -486,6 +486,23 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#Summary of Fishers test
+cd /media/aswin/SCFR/SCFR-main/
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo " -"$species
+cd /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
+for out in $(ls *.out)
+do
+ab=$(echo $out | sed 's/^.*_SCFR_atleast_//g' | sed 's/\.out/ /g' | sed "s/$species//g" | sed 's/__//g')
+o1=$(cat $out | awk -F ":" '/# Number of/ {print$2}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+o2=$(cat $out | grep "in -a" | awk -F "|" '{print$2,$3}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+o3=$(cat $out | tail -1 | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+echo $ab $o1 $o2 $o3
+unset ab o1 o2 o3
+done | sed '1i Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > $species"_fisher_test_summary"
+cd /media/aswin/SCFR/SCFR-main/
+
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
 
