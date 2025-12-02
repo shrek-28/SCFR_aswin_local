@@ -718,6 +718,25 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#Get chromosome-wise summary of fourier analysis
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+  do
+  echo ">"$species
+for fourier in $(find Fourier_analysis/$species/ -name "output_*.fasta" -type d)
+do
+(
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $fourier
+) &
+done
+wait
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
+
 #-----------------------------------------------------------------------------------------------------------
 #For genes
 
