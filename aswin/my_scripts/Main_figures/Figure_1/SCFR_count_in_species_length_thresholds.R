@@ -13,21 +13,22 @@ df <- read_csv(data_file, skip = 2)
 
 # Define the mapping from short names to full professional names
 species_map <- c(
-  "human" = "Human",
-  "chimpanzee" = "Chimpanzee",
-  "bonobo" = "Bonobo",
+  "gibbon" = "Gibbon",
   "gorilla" = "Gorilla",
-  "sorangutan" = "Sumatran orangutan",
+  "human" = "Human",
+  "bonobo" = "Bonobo",
+  "chimpanzee" = "Chimpanzee",
   "borangutan" = "Bornean orangutan",
-  "gibbon" = "Gibbon"
+  "sorangutan" = "Sumatran orangutan"
+  
 )
 
 # Apply the mapping to the Species column
 df$Species <- dplyr::recode(df$Species, !!!species_map)
 
 # Define the order of species on the X-axis using the new full names
-species_order_full <- c("Human", "Chimpanzee", "Bonobo", "Gorilla", 
-                        "Sumatran orangutan", "Bornean orangutan", "Gibbon")
+species_order_full <- c("Gibbon", "Gorilla", "Human", "Bonobo", "Chimpanzee", "Bornean orangutan",
+                        "Sumatran orangutan")
 df$Species <- factor(df$Species, levels = species_order_full)
 
 # Convert 'Window' to factor for coloring/grouping
@@ -37,7 +38,7 @@ df$Window <- as.factor(df$Window)
 # --- 3. Create Label Data Frame ---
 # Filter the data to get only the last point of each line (Species == 'Gibbon') 
 label_df <- df %>% 
-  filter(Species == 'Gibbon')
+  filter(Species == 'Sumatran orangutan')
 
 # --- 4. Define Professional Color Palette ---
 # Define a professional palette (8 colors) using shades of black, blue, and brown/red
@@ -91,7 +92,7 @@ p <- ggplot(
   
   # Add Labels and Title (Y-axis uses bquote for log subscript)
   labs(
-    title = "Total Number of SCFRs Across Species for Different Window Stretches",
+    title = "Total Number of SCFRs Across Species for Different Length Threshold",
     x = "Species",
     # 🚨 CHANGE 2: Using bquote for log subscript in Y-axis title
     y = bquote(bold("SCFR Count " (log[10] * " scale"))),

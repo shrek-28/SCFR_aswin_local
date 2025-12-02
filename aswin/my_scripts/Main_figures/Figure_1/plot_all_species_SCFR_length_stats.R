@@ -21,12 +21,17 @@ output_pdf  <- args[2]
 # -----------------------------------------------------------
 df <- read.table(input_file, header = TRUE, sep = "\t")
 
-#df <- read.table(args[1], header=TRUE)
-
-# Optional second argument = output PDF name
-output_pdf <- ifelse(length(args) >= 2, args[2], NA)
-
-df$species <- factor(df$species, levels=df$species)
+# Set the desired order for the species factor on the X-axis
+species_order <- c(
+  "Gibbon",
+  "Gorilla",
+  "Human",
+  "Bonobo",
+  "Chimpanzee",
+  "Bornean orangutan",
+  "Sumatran orangutan"
+)
+df$species <- factor(df$species, levels = species_order)
 df$max_kb <- round(df$max/1000, 2)
 
 # ------------------------------------
@@ -51,11 +56,11 @@ p <- ggplot(df, aes(
   # Thicker Q1/Q3 edges
   geom_segment(aes(x=as.numeric(species)-0.25,
                    xend=as.numeric(species)+0.25,
-                   y=q1, yend=q1), 
+                   y=q1, yend=q1),
                linewidth=1.2) +
   geom_segment(aes(x=as.numeric(species)-0.25,
                    xend=as.numeric(species)+0.25,
-                   y=q3, yend=q3), 
+                   y=q3, yend=q3),
                linewidth=1.2) +
   
   # Thin whiskers + caps
@@ -137,7 +142,7 @@ geom_text(aes(
   theme_bw() +
   theme(
     axis.text.x = element_text(angle=35, hjust=1, size=14),
-    legend.position = "none"  # We'll place legend externally
+    legend.position = "none"   # We'll place legend externally
   )
 
 # ----------------------------------------------------------------
@@ -185,8 +190,8 @@ ggsave(
   plot = final_plot,
   width =12,
   height = 9,
-#  dpi = 600,       # High resolution
-#  device = cairo_pdf  # Best for vector export
+  #   dpi = 600,       # High resolution
+  #   device = cairo_pdf    # Best for vector export
   units = "in",
   dpi = 800,
   device = cairo_pdf
