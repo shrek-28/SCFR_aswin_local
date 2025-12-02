@@ -457,7 +457,7 @@ time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorte
 #Fisher's test
 bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
 
-#Run fisheers test (5 secs)
+#Run fishers test (5 secs)
 mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test
 
 cd /media/aswin/SCFR/SCFR-main
