@@ -457,7 +457,7 @@ time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorte
 #Fisher's test
 bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
 
-#Run fisheers test (5 secs)
+#Run fishers test (5 secs)
 mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test
 
 cd /media/aswin/SCFR/SCFR-main
@@ -485,6 +485,35 @@ do
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#Summary of Fishers test
+cd /media/aswin/SCFR/SCFR-main/
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo " -"$species
+cd /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
+for out in $(ls *.out | grep "gene_deserts")
+do
+ab=$(echo $out | sed 's/^.*_SCFR_atleast_//g' | sed 's/\.out/ /g' | sed "s/$species//g" | sed 's/__//g')
+o1=$(cat $out | awk -F ":" '/# Number of/ {print$2}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+o2=$(cat $out | grep "in -a" | awk -F "|" '{print$2,$3}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+o3=$(cat $out | tail -1 | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+echo $ab $o1 $o2 $o3
+unset ab o1 o2 o3
+done | sed '1i Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > $species"_fisher_test_summary"
+unset out
+cd /media/aswin/SCFR/SCFR-main/
+done
+
+#Combine all species summary
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+for fisher in $(find gene_deserts/fishers_test/ -name $species"_fisher_test_summary")
+do
+sed "s/^/$species /g" $fisher | grep -v "Possible_intervals"
+done
+done | sed '1i Species Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/all_species_summary
+sort -k15,15V -k2,2n all_species_summary
 
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
@@ -689,6 +718,44 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#Get chromosome-wise summary of fourier analysis
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+  do
+  echo ">"$species
+for fourier in $(find Fourier_analysis/$species/ -name "output_*.fasta" -type d)
+do
+(
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $fourier
+) &
+done
+wait
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#Get species-wise summary
+cd /media/aswin/SCFR/SCFR-main
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+cd Fourier_analysis/$species
+for len in 5000 7500 10000
+do
+for tsv in $(find $len -name "summary.tsv" -type f)
+do
+chr=$(echo $tsv | cut -f3 -d "/" | cut -f2,3 -d "_" | sed 's/\.fasta//g')
+grep -v "Num_Raw_Peaks" $tsv | sed "s/^/$len\t$chr\t/g"
+unset chr
+done
+unset tsv
+done | column -t > all_length_thresholds_fourier_summary
+unset len
+cd /media/aswin/SCFR/SCFR-main
+done
+
+#-----------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------
 #For genes
 
