@@ -492,7 +492,7 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo " -"$species
 cd /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
-for out in $(ls *.out)
+for out in $(ls *.out | grep "gene_deserts")
 do
 ab=$(echo $out | sed 's/^.*_SCFR_atleast_//g' | sed 's/\.out/ /g' | sed "s/$species//g" | sed 's/__//g')
 o1=$(cat $out | awk -F ":" '/# Number of/ {print$2}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
@@ -501,7 +501,19 @@ o3=$(cat $out | tail -1 | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g
 echo $ab $o1 $o2 $o3
 unset ab o1 o2 o3
 done | sed '1i Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > $species"_fisher_test_summary"
+unset out
 cd /media/aswin/SCFR/SCFR-main/
+done
+
+#Combine all species summary
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+for fisher in $(find gene_deserts/fishers_test/ -name $species"_fisher_test_summary")
+do
+sed "s/^/$species /g" $fisher | grep -v "Possible_intervals"
+done
+done | sed '1i Species Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/all_species_summary
+
 
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
