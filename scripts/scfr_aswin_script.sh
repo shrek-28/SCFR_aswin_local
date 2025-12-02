@@ -513,7 +513,7 @@ do
 sed "s/^/$species /g" $fisher | grep -v "Possible_intervals"
 done
 done | sed '1i Species Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/all_species_summary
-
+sort -k15,15V -k2,2n all_species_summary
 
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
