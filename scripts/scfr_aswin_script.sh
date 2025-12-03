@@ -468,7 +468,44 @@ done
 cd /media/aswin/SCFR/SCFR-main/
 for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
-awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/human_0_only_intergenic_gene_deserts_overlaps.out | ministat -n
+for o in $(find gene_deserts/SCFR_overlap_gene_deserts/$species -name "*_overlaps.out")
+do
+len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
+stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g' | sed "s/^/$species $len /g")
+echo $stats
+unset len stats
+done
+unset o
+done | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Median Avg Stddev' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
+
+#Get fasta of overlapping SCFRs
+cd /media/aswin/SCFR/SCFR-main/
+start_time=$(date +%s)
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+cd gene_deserts/SCFR_overlap_gene_deserts/$species
+mkdir SCFR_fasta
+#for each length thresholds
+for o in $(find . -name "*_overlaps.out" | egrep "10000_only|5000_only")
+do
+len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
+#for each scfr
+for scfr in $(awk '{print$4"::"$1":"$2"-"$3"("substr($4,1,1)")"}' $o)
+do
+chr=$(echo $scfr | cut -f3 -d ":")
+name=$(echo $scfr | sed 's/^-/minus_/g' | cut -f1 -d "(" | tr ":-" "_" | sed 's/__/_/g')
+#myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$chr".fasta" "$scfr" > SCFR_fasta/$name".fa"
+myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$chr".fasta" "$scfr"
+unset chr names
+done > SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa"
+unset len
+done
+unset o
+cd /media/aswin/SCFR/SCFR-main/
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------
