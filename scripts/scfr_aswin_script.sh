@@ -464,7 +464,7 @@ mkdir gene_deserts/SCFR_overlap_gene_deserts/$species
 done
 done
 
-#Summary of SCRR gene deserts at different length thresholds.
+#Summary of SCFRs in gene deserts at different length thresholds.
 cd /media/aswin/SCFR/SCFR-main/
 for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
@@ -500,7 +500,8 @@ myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$c
 unset chr names
 done > SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa"
 #Check ORF
-ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_orf.fa"
+ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa"
+ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 1 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa"
 unset len
 done
 unset o
@@ -508,6 +509,41 @@ cd /media/aswin/SCFR/SCFR-main/
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#Run nr blast
+
+cd /media/aswin/SCFR/SCFR-main/
+start_time=$(date +%s)
+#Don't use gorilla here
+for species in human chimpanzee bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+cd gene_deserts/SCFR_overlap_gene_deserts/
+for path in $(find $species/SCFR_fasta -name "*_overlapping_scfrs_canonical_orf.fa")
+do
+can=$(echo $path)
+noncan=$(echo $path | sed 's/_canonical_/_non_canonical_/g')
+scfrcan=$(echo $path | awk -F "/" '{print$NF}')
+echo " - "$scfrcan
+#Run blast on canonical ORFs
+time blastp -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 100 -outfmt 11 -num_threads 32 -out $species/SCFR_fasta/$scfrcan".outfmt11"
+blast_formatter -archive $species/SCFR_fasta/$scfrcan".outfmt11" -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/$scfrcan".outfmt6"
+#Run blast on non-canonical ORFs
+fnoncan=$(echo $noncan | sed 's/_non_canonical_orf.fa/_non_canonical_filtered_orf.fa/g')
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/subtract_fasta.py $can $noncan > $fnoncan
+scfrnoncan=$(echo $fnoncan | awk -F "/" '{print$NF}')
+time blastp -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 100 -outfmt 11 -num_threads 32 -out $species/SCFR_fasta/$scfrnoncan".outfmt11"
+blast_formatter -archive $species/SCFR_fasta/$scfrnoncan".outfmt11" -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/$scfrnoncan".outfmt6"
+unset can noncan scfrcan fnoncan scfrnoncan
+done
+cd /media/aswin/SCFR/SCFR-main/
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------
 #10.3. Fishers test
