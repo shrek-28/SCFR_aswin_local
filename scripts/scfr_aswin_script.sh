@@ -73,7 +73,7 @@ grep -vf <(awk '{print$1}' QC/genome_metadata/all_species_chr_length | grep -v "
 cd /media/aswin/SCFR/SCFR-main
 mkdir -p QC/genome_metadata
 
-#get genome metadata
+#3.1. get genome metadata
 cd /media/aswin/SCFR/SCFR-main/QC
 awk '{print$1}' genome_accessions \
 | xargs -n1 sh -c 'datasets summary genome accession $0 --as-json-lines | json2xml | xtract -pattern root -def "-" -element organism_name assembly_name assembly_level accession contig_l50 contig_n50 scaffold_l50 scaffold_n50 total_number_of_chromosomes total_sequence_length total_ungapped_length genome_coverage' \
@@ -95,7 +95,7 @@ done < genome_accessions
 cd /media/aswin/SCFR/SCFR-main/QC/genome_metadata
 find . -name "*_genome_metadata.txt" | xargs -n1 sh -c 'awk "{print\$9,\$8}" $0' | grep -v "refseq_accession" | sed '1i refseq_accession Length' | grep -v "^\-" > all_species_chr_length
 
-#Calculate length of chromosome from fetched genome sequences
+#3.2. Calculate length of chromosome from fetched genome sequences
 cd /media/aswin/SCFR/SCFR-main/chrs
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
      do
@@ -110,7 +110,7 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
      cd /media/aswin/SCFR/SCFR-main/chrs
 done | sed '1i Species chromosome length' | column -t > /media/aswin/SCFR/SCFR-main/QC/genome_metadata/fetched_length
 
-#Report errors in input: Compare lengths between fetched and database chromosomes
+#3.3. Report errors in input: Compare lengths between fetched and database chromosomes
 cd /media/aswin/SCFR/SCFR-main/QC/genome_metadata
 for chr in $(awk '{print$1}' all_species_chr_length | egrep -v "refseq_accession|-")
      do
@@ -189,18 +189,18 @@ cd /media/aswin/SCFR/SCFR-main/SCFR_summaries
 ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep -v Chromosome $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_all_frame_summary_all.csv//g' | tr "," " " | tr -d '"' | sed '1i Species Chromosome Frame N Min Q1 Median Mean Q3 Max SD P95 P99 Q_1Kb Q_5Kb Q_10Kb' > all_species_chromsome_frame_wise_summary
 ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep ALL $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_all_frame_summary_all.csv//g' | tr "," " " | tr -d '"' | sed '1i Species Chromosome Frame N Min Q1 Median Mean Q3 Max SD P95 P99 Q_1Kb Q_5Kb Q_10Kb' > all_species_frame_wise_summary
 
-#Plot data
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-plot_all_species_SCFR_length_stats.R 
-window_wise_all_species_scfr_coding_stats.csv
+#4.4. Plot data
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	plot_all_species_SCFR_length_stats.R 
+	window_wise_all_species_scfr_coding_stats.csv
 
 #Make SCFR length stats plot
 #NOTE: Rename species common names before plotting
-cd /media/aswin/SCFR/SCFR-main/SCFR_all
-Rscript /media/aswin/SCFR/SCFR-main/my_scripts/plot_all_species_SCFR_length_stats.R all_scfr_length_stats.tsv all_scfr_length_stats.pdf
+	cd /media/aswin/SCFR/SCFR-main/SCFR_all
+	Rscript /media/aswin/SCFR/SCFR-main/my_scripts/plot_all_species_SCFR_length_stats.R all_scfr_length_stats.tsv all_scfr_length_stats.pdf
 
-#########################################################################################################################
+####################################################################################################################################################################################################################################################################################################################
 #5. Strand assymetry
 
 #5.1. Get strand assymetry of SCFRs per chromosome (11.3 mins)
@@ -245,7 +245,7 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#combine the summaries
+#5.4. combine the summaries
 cd /media/aswin/SCFR/SCFR-main/SCFR_all
 ls | grep "_SCFR_asymmetries_out.csv" | xargs -n1 sh -c 'grep -v chrom $0 | sed "s/^/$0 /g"' | sed 's/_SCFR_asymmetries_out.csv//g' | tr "," " " | tr -d '"' \
 	| sed '1i Species chrom f_count r_count strand_count_asym f_length r_length strand_length_asym frame1_count frame1_length frame2_count frame2_length frame3_count frame3_length frame-1_count frame-1_length frame-2_count frame-2_length frame-3_count frame-3_length' > all_species_chromosome_wise_SCFR_asymmetries
@@ -253,8 +253,9 @@ ls | grep "_SCFR_asymmetries_out.csv" | xargs -n1 sh -c 'grep ALL $0 | sed "s/^/
 	| sed '1i Species chrom f_count r_count strand_count_asym f_length r_length strand_length_asym frame1_count frame1_length frame2_count frame2_length frame3_count frame3_length frame-1_count frame-1_length frame-2_count frame-2_length frame-3_count frame-3_length' > all_species_SCFR_asymmetries
 
 ##################################################################################################################################################################################################################################################
-#6. get GC content of the SCFRs (48.1667)
+#6. GC content & coding gene enrichment
 
+#6.1. get GC content of the SCFRs (48.1667)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -271,8 +272,8 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#########################################################################################################################
-#7. Download all the seven primate genome annotation files
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#6.2. Download all the seven primate genome annotation files
 
 #6.18333 mins
 cd /media/aswin/SCFR/SCFR-main/genes
@@ -297,8 +298,8 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#########################################################################################################################
-#8. Extract coding exons annotated in the GTF
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#6.3. Extract coding exons annotated in the GTF
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -316,8 +317,10 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#########################################################################################################################
-#9. Bin the SCFR counts by length and GC content
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#6.4. Window-wise GC content of SCFR
+
+#6.4.1. Bin the SCFR counts by length and GC & AT content
 
 #For AT (19.7833 mins)
 	cd /media/aswin/SCFR/SCFR-main/SCFR_all
@@ -349,7 +352,9 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 	echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#Find genes intersecting with long SCFRs
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#6.5. Find genes intersecting with long SCFRs
+
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -368,7 +373,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 Rscript scripts/combined_2dhist.r
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#Summaries
+#6.6. Summaries
 
 #Get the sum of all SCFR counts across all length bins for each GC bins (12.5333 mins)
 	cd /media/aswin/SCFR/SCFR-main/SCFR_all
@@ -390,9 +395,9 @@ Rscript scripts/combined_2dhist.r
 
 
 #######################################################################################################################################################################################################################################################################################################
-#10. Gene deserts
+#7. Gene deserts
 
-#10.1. Identify gene deserts (1 min)
+#7.1. Identify gene deserts (1 min)
 mkdir /media/aswin/SCFR/SCFR-main/gene_deserts
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -411,8 +416,8 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#------------------------------------------------------------------------------------------------------------------------------------------------------
-#10.2. Plot length stats of gene deserts
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#7.2. Plot length stats of gene deserts
 
 #Get genome sizes
 mkdir -p genome_sizes
@@ -446,8 +451,8 @@ cd /media/aswin/SCFR/SCFR-main/
 python3 compute_desert_stats.py gene_deserts/*.bed
 Rscript plot_gene_desert_stats.r all_desert_lengths.tsv
 
-#------------------------------------------------------------------------------------------------------------------------------------------------------
-#Identify SCFRs in gene deserts
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#7.3. Identify SCFRs in gene deserts
 
 cd /media/aswin/SCFR/SCFR-main/
 mkdir gene_deserts/SCFR_overlap_gene_deserts
@@ -478,7 +483,11 @@ done
 unset o
 done | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Median Avg Stddev' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
 
-#Get fasta of overlapping SCFRs
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Identify genes in SCFRs overlapping gene deserts
+
+#7.4.1. Get fasta of overlapping SCFRs
+
 cd /media/aswin/SCFR/SCFR-main/
 start_time=$(date +%s)
 for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
@@ -514,7 +523,7 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#Run nr blast locally
+#7.4.2. Run nr blast locally
 
 cd /media/aswin/SCFR/SCFR-main/
 start_time=$(date +%s)
@@ -548,20 +557,20 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 
 
-#------------------------------------------------------------------------------------------------------------------------------------------------------
-#10.3. Fishers test
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#8. Fishers test
 
-#Merge SCFRs into genome-wide intervals
-time sort -k1,1 -k2,2n SCFR_all/human_SCFR_all.out > human_SCFR_all_sorted.out
-time bedtools merge -i human_SCFR_all_sorted.out | awk '{print$1,$2,$3}' OFS="\t" > human_SCFR_all_sorted_merged.bed
-#Keep only long SCFRs
-time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorted_merged_atleast_1kb.bed
-#Fisher's test
-bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
+#8.1. Prepare data
+	#Merge SCFRs into genome-wide intervals
+	time sort -k1,1 -k2,2n SCFR_all/human_SCFR_all.out > human_SCFR_all_sorted.out
+	time bedtools merge -i human_SCFR_all_sorted.out | awk '{print$1,$2,$3}' OFS="\t" > human_SCFR_all_sorted_merged.bed
+	#Keep only long SCFRs
+	time awk '$3-$2 >= 1000' human_SCFR_all_sorted_merged.bed > human_SCFR_all_sorted_merged_atleast_1kb.bed
+	#Fisher's test
+	bedtools fisher -a human_SCFR_all_sorted_merged_atleast_1kb.bed -b gene_deserts/human_only_intergenic_gene_deserts.bed -g genome_sizes/human.genome
 
-#Run fishers test (5 secs)
+#8.2. Run fishers test (5 secs)
 mkdir /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test
-
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -588,24 +597,24 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#Summary of Fishers test
-cd /media/aswin/SCFR/SCFR-main/
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-echo " -"$species
-cd /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
-for out in $(ls *.out | grep "gene_deserts")
-do
-ab=$(echo $out | sed 's/^.*_SCFR_atleast_//g' | sed 's/\.out/ /g' | sed "s/$species//g" | sed 's/__//g')
-o1=$(cat $out | awk -F ":" '/# Number of/ {print$2}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
-o2=$(cat $out | grep "in -a" | awk -F "|" '{print$2,$3}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
-o3=$(cat $out | tail -1 | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
-echo $ab $o1 $o2 $o3
-unset ab o1 o2 o3
-done | sed '1i Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > $species"_fisher_test_summary"
-unset out
-cd /media/aswin/SCFR/SCFR-main/
-done
+#8.3. Summary of Fishers test
+	cd /media/aswin/SCFR/SCFR-main/
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo " -"$species
+	cd /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/$species
+	for out in $(ls *.out | grep "gene_deserts")
+	do
+	ab=$(echo $out | sed 's/^.*_SCFR_atleast_//g' | sed 's/\.out/ /g' | sed "s/$species//g" | sed 's/__//g')
+	o1=$(cat $out | awk -F ":" '/# Number of/ {print$2}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	o2=$(cat $out | grep "in -a" | awk -F "|" '{print$2,$3}' | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	o3=$(cat $out | tail -1 | paste -s -d " " | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	echo $ab $o1 $o2 $o3
+	unset ab o1 o2 o3
+	done | sed '1i Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > $species"_fisher_test_summary"
+	unset out
+	cd /media/aswin/SCFR/SCFR-main/
+	done
 
 #Combine all species summary
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -621,34 +630,34 @@ cd /media/aswin/SCFR/SCFR-main
 awk '$13<0.05' gene_deserts/fishers_test/all_species_summary > gene_deserts/fishers_test/scfr_significant_higher_overlaps_with_gene_deserts_than_expected
 
 ####################################################################################################################################################################################################################################################################################################################
-#11. Filter SCFRs that are part of coding region
+#9. SCFRs at length thresholds
 
-#Filter with different length cut offs (16.0167 mins)
-cd /media/aswin/SCFR/SCFR-main
-start_time=$(date +%s)
-for win in 0 100 500 1000 2500 5000 7500 10000
-do
-echo ">"$win
-mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-  do
-  (
-  echo " -"$species
-  cds=$(find genes/$species/ -name "GCF_*.bed")
-  #Filter SCFRs longer than the window
-  awk -v a="$win" '{if($3-$2>=a) print$1,$2,$3,$4}' OFS="\t" SCFR_all/${species}_SCFR_all.out > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out"
-  #Get SCFRs that don't overlap with coding genes
-  bedtools intersect -v -a SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" -b $cds | awk '{print$1,$2,$3,$4,$3-$2}' OFS="\t" > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed"
-  ) &
-done
-wait
-unset species cds
-done
-end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
-echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
-####################################################################################################################################################################################################################################################################################################################
-#Get window-wise summary of SCFR count and length & it's overlap with whole genome & cds from all species (99.3667 mins)
+#9.1. Filter with different length cut offs (16.0167 mins)
+	cd /media/aswin/SCFR/SCFR-main
+	start_time=$(date +%s)
+	for win in 0 100 500 1000 2500 5000 7500 10000
+	do
+	echo ">"$win
+	mkdir -p /media/aswin/SCFR/SCFR-main/SCFR_lists/"$win"
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	  do
+	  (
+	  echo " -"$species
+	  cds=$(find genes/$species/ -name "GCF_*.bed")
+	  #Filter SCFRs longer than the window
+	  awk -v a="$win" '{if($3-$2>=a) print$1,$2,$3,$4}' OFS="\t" SCFR_all/${species}_SCFR_all.out > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out"
+	  #Get SCFRs that don't overlap with coding genes
+	  bedtools intersect -v -a SCFR_lists/${win}/${species}"_SCFR_atleast_"$win".out" -b $cds | awk '{print$1,$2,$3,$4,$3-$2}' OFS="\t" > SCFR_lists/${win}/${species}"_SCFR_atleast_"$win"_in_non_coding.bed"
+	  ) &
+	done
+	wait
+	unset species cds
+	done
+	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+	echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+	
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#9.2. #Get window-wise summary of SCFR count and length & it's overlap with whole genome & cds from all species (99.3667 mins)
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -696,30 +705,33 @@ wait
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e > /media/aswin/SCFR/SCFR-main/SCFR_summaries/runtime_window_wise_all_species_scfr_coding_stats
 
-#Plot SCFR count & length stats & percent in genome & cds 
-awk -F "," '{print$1,$2,(($3-$4)/$3*100),($4/$3*100),$3,$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | awk 'BEGIN{FS=OFS=","} NR==1{$3="Percent_coding_SCFR"; $4="Percent_noncoding_SCFR"}1' | tr " " "," > filtered_window_wise_all_species_scfr_coding_stats.csv
-awk -F "," 'NR>1{print$1,$2,$3,(($3-$4)/$3*100),($4/$3*100),$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | sed '1i Species,Window,Total_No_SCFR,Percent_coding_SCFR_count,Percent_noncoding_SCFR_count,Percent_unfiltered_by_filtered_SCFR,Percent_genome_by_SCFR,Percent_SCFR_by_coding' | sed 's/ /,/g' > filtered_window_wise_all_species_scfr_coding_stats.csv
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#9.3. Plot SCFR count & length stats & percent in genome & cds 
+	awk -F "," '{print$1,$2,(($3-$4)/$3*100),($4/$3*100),$3,$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | awk 'BEGIN{FS=OFS=","} NR==1{$3="Percent_coding_SCFR"; $4="Percent_noncoding_SCFR"}1' | tr " " "," > filtered_window_wise_all_species_scfr_coding_stats.csv
+	awk -F "," 'NR>1{print$1,$2,$3,(($3-$4)/$3*100),($4/$3*100),$9,$11,$14}' window_wise_all_species_scfr_coding_stats.csv | sed '1i Species,Window,Total_No_SCFR,Percent_coding_SCFR_count,Percent_noncoding_SCFR_count,Percent_unfiltered_by_filtered_SCFR,Percent_genome_by_SCFR,Percent_SCFR_by_coding' | sed 's/ /,/g' > filtered_window_wise_all_species_scfr_coding_stats.csv
+	
+	mkdir SCFR_summaries/plot_all_species_SCFR_count_length_percent_with_genome_and_cds
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo ">"$species
+	cat SCFR_summaries/filtered_window_wise_all_species_scfr_coding_stats.csv | egrep "$species|Window" > "temp_"$species".csv"
+	Rscript my_scripts/plot_all_species_SCFR_count_length_percent_with_genome_and_cds.R "temp_"$species".csv" SCFR_summaries/plot_all_species_SCFR_count_length_percent_with_genome_and_cds/$species"_plot_all_species_SCFR_count_length_percent_with_genome_and_cds.pdf"
+	done
 
-mkdir SCFR_summaries/plot_all_species_SCFR_count_length_percent_with_genome_and_cds
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-echo ">"$species
-cat SCFR_summaries/filtered_window_wise_all_species_scfr_coding_stats.csv | egrep "$species|Window" > "temp_"$species".csv"
-Rscript my_scripts/plot_all_species_SCFR_count_length_percent_with_genome_and_cds.R "temp_"$species".csv" SCFR_summaries/plot_all_species_SCFR_count_length_percent_with_genome_and_cds/$species"_plot_all_species_SCFR_count_length_percent_with_genome_and_cds.pdf"
-done
-
-#Get coding gene length stats of species
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-echo ">"$species
-gene_length_stats=$(myfasta -l $species/GC*_cds.fa | awk '{print$NF}' | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g')
-echo $species $gene_length_stats
-unset species gene_length_stats
-done | column -t > gene_length_stats
+#9.4. Get coding gene length stats of species
+	cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo ">"$species
+	gene_length_stats=$(myfasta -l $species/GC*_cds.fa | awk '{print$NF}' | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g')
+	echo $species $gene_length_stats
+	unset species gene_length_stats
+	done | column -t > gene_length_stats
 
 ####################################################################################################################################################################################################################################################################################################################
-#12. Quantification of codon usage patterns and PCA (10.7167 mins)
+#10. Identify unique SCFRs using PCA
+
+#10.1. Quantification of codon usage patterns and PCA (10.7167 mins)
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -753,8 +765,8 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#-----------------------------------------------------------------------------------------------------------
-#For easier visual inspection plot PCA without labels (2.46667 mins)
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#10.2. For easier visual inspection plot PCA without labels (2.46667 mins)
 
 mkdir /media/aswin/SCFR/SCFR-main/PCA_without_labels
 cd /media/aswin/SCFR/SCFR-main/
@@ -776,10 +788,10 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 ####################################################################################################################################################################################################################################################################################################################
-#13. Discrete Fourier Transform Analysis
+#11. Discrete Fourier Transform Analysis of SCFR
 
-#-----------------------------------------------------------------------------------------------------------
-#For SCFRs (for 5000, 7500 & 10000 - 72.8667 mins) (for 1000 & 2500 - )
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#11.1. Run fourier analysis for SCFRs (for 5000, 7500 & 10000 - 72.8667 mins) (for 1000 & 2500 - )
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -823,7 +835,9 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#Get chromosome-wise summary of fourier analysis
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#11.2. Get chromosome-wise summary of fourier analysis
+
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -870,17 +884,16 @@ done
 
 #Look at fourier periodicity in SCFRs located inside gene deserts
 
-#-----------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------
-#For genes
+####################################################################################################################################################################################################################################################################################################################
+#12. Fourier analysis of genes
 
-#Get GTF associated with genome
-mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
-cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
-cat /media/aswin/SCFR/SCFR-main/QC/genome_accessions | xargs -n2 bash -c 'paste <(echo $1 $0) <(datasets summary genome accession $0 --as-json-lines | json2xml | xtract -pattern root -def "-" -element accession)' | column -t > genome_gtf_accessions
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-echo ">"$species
+#12.1. Get GTF associated with genome
+	mkdir /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+	cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+	cat /media/aswin/SCFR/SCFR-main/QC/genome_accessions | xargs -n2 bash -c 'paste <(echo $1 $0) <(datasets summary genome accession $0 --as-json-lines | json2xml | xtract -pattern root -def "-" -element accession)' | column -t > genome_gtf_accessions
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo ">"$species
 
 #Download cds from ncbi (21.9667 mins)
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
@@ -901,8 +914,10 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 rm -r cds
 
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#12.2. Check gene cds length stats
+
 #The code for fourier don't work for very short sequences; hence check length stats of cds
-#Check gene cds length stats
 cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
 time for seq in $(find . -mindepth 2 -maxdepth 2 -name "GCF_*_cds.fa")
 do
@@ -912,7 +927,9 @@ echo $id $stat
 unset id stat
 done | sed '1i Species annotation N Min Max Median Avg Stddev' | column -t > annotation_length_stats
 
-#Run fourier analysis of genes (474.25)
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#12.3. Run fourier analysis of genes (474.25)
+
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
