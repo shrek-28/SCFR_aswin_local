@@ -466,7 +466,9 @@ done
 
 #Summary of SCRR gene deserts at different length thresholds.
 cd /media/aswin/SCFR/SCFR-main/
-
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/human_0_only_intergenic_gene_deserts_overlaps.out | ministat -n
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------
