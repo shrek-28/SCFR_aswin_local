@@ -1,19 +1,38 @@
 #############################################################################################################################################################################################################################################################################################################
+#DRAFT SCRIPTS
+#############################################################################################################################################################################################################################################################################################################
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#BLAST SCFR against nr database
+
+cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts/ncbi_nr_search
+time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -out results.blastp.out -evalue 0.005 -max_target_seqs 100 -outfmt 6 -num_threads 32
+
+
+time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 100 -outfmt 11 -num_threads 32 -out test.outfmt11
+blast_formatter -archive test.outfmt11 -outfmt 3 -line_length 280 -out test.outfmt3
+blast_formatter -archive test.outfmt11 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+| sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > test.outfmt6
 
 
 
-mkdir /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot
-cd /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#
 
-cd /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot
-find /media/aswin/SCFR/SCFR-main/genes/$species/ -name "*merged*" | xargs -n1 sh -c 'cp $0 /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot/'
-report=$(readlink -f /media/aswin/SCFR/SCFR-main/genome_reports/* | grep $species)
-awk -F"\t" -v OFS="\t" '{ for(N=1; N<=NF; N++) if($N=="") $N="-" } 1'  $report | sed 's/ /_/g' | awk 'NR>1{print$9,$12}' | sed '1i accession names' > $species"_chromosome_names"
-cp /media/aswin/SCFR/SCFR-main/genome_sizes/$species".genome" .
+  mkdir /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot
+  cd /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot
+  
+  cd /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot
+  find /media/aswin/SCFR/SCFR-main/genes/$species/ -name "*merged*" | xargs -n1 sh -c 'cp $0 /media/aswin/SCFR/SCFR-main/SCFR_summaries/circos_plot/'
+  report=$(readlink -f /media/aswin/SCFR/SCFR-main/genome_reports/* | grep $species)
+  awk -F"\t" -v OFS="\t" '{ for(N=1; N<=NF; N++) if($N=="") $N="-" } 1'  $report | sed 's/ /_/g' | awk 'NR>1{print$9,$12}' | sed '1i accession names' > $species"_chromosome_names"
+  cp /media/aswin/SCFR/SCFR-main/genome_sizes/$species".genome" .
 
 
-##########
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #View SCFR length filtered summary in window-wise
+
 for i in $(awk -F "," '{print$2}' window_wise_all_species_scfr_coding_stats.csv | grep -v Window | sort -u)
 do
 j=$(for s in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -66,13 +85,13 @@ unset j
 done | sort -k1,1n | sed '1i Window human bonobo chimpanzee gorilla borangutan sorangutan gibbon' \
 | awk 'NR==1{print; next} {for(i=2;i<=NF;i++) {if($i>=100000) {$i=sprintf("%.2fm",$i/1000000)} else if($i>=1000) {$i=sprintf("%.2fk",$i/1000)} else {$i=sprintf("%.0f",$i)}} print}' OFS="\t" | column -t > length_threshold_SCFR_cds_overlap_summary
 
-
 cat length_threshold_percent_genome_covered_summary | sed -n 4p | awk '!($1="")' | tr " " "\n" | awk NF | sort -r
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #View higher strand asymmetry
 sed 's/ /_/g' genome_reports/GCA_029289425.3_bonobo.tsv | awk -F"\t" -v OFS="\t" '{ for(N=1; N<=NF; N++) if($N=="") $N="-" } 1' | awk '{print$9,$3,$4,$5,$11}' | sort -k5,5n | colnum.sh 
 
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #gene deserts scfr overlaps
 
 cd /media/aswin/SCFR/SCFR-main
