@@ -487,7 +487,7 @@ echo ">"$species
 cd gene_deserts/SCFR_overlap_gene_deserts/$species
 mkdir SCFR_fasta
 #for each length thresholds
-for o in $(find . -name "*_overlaps.out" | egrep "10000_only|5000_only")
+for o in $(find . -name "*_overlaps.out" | egrep "10000_only|5000_only|7500_only")
 do
 len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
 #for each scfr
@@ -506,7 +506,6 @@ cd /media/aswin/SCFR/SCFR-main/
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------
 #10.3. Fishers test
