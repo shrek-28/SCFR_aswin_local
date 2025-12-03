@@ -9,6 +9,44 @@
 cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts/ncbi_nr_search
 time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -out results.blastp.out -evalue 0.005 -max_target_seqs 100 -outfmt 6 -num_threads 32
 
+cd /media/aswin/SCFR/SCFR-main/
+start_time=$(date +%s)
+#Don't use gorilla here
+for species in human chimpanzee bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+cd gene_deserts/SCFR_overlap_gene_deserts/
+mkdir $species/SCFR_fasta/v4
+for path in $(find $species/SCFR_fasta -name "*_overlapping_scfrs_canonical_orf.fa")
+do
+can=$(echo $path)
+noncan=$(echo $path | sed 's/_canonical_/_non_canonical_/g')
+scfrcan=$(echo $path | awk -F "/" '{print$NF}')
+echo " - "$scfrcan
+#Run blast on canonical ORFs
+	#time blastp -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 20 --max_hsps 3 -outfmt 11 -num_threads 32 -out $species/SCFR_fasta/$scfrcan".outfmt11"
+	#blast_formatter -archive $species/SCFR_fasta/$scfrcan".outfmt11" -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+		# | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/$scfrcan".outfmt6"
+time blastp -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.0001 -max_target_seqs 20 -max_hsps 3 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/v4/$scfrcan".outfmt6"
+
+#Run blast on non-canonical ORFs
+fnoncan=$(echo $noncan | sed 's/_non_canonical_orf.fa/_non_canonical_filtered_orf.fa/g')
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/subtract_fasta.py $can $noncan > $fnoncan
+scfrnoncan=$(echo $fnoncan | awk -F "/" '{print$NF}')
+	#time blastp -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 3 -outfmt 11 -num_threads 32 -out $species/SCFR_fasta/$scfrnoncan".outfmt11"
+	#blast_formatter -archive $species/SCFR_fasta/$scfrnoncan".outfmt11" -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+		#| sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/$scfrnoncan".outfmt6"
+time blastp -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.0001 -max_target_seqs 20 -max_hsps 3 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/v4/$scfrnoncan".outfmt6"
+unset can noncan scfrcan fnoncan scfrnoncan
+done
+cd /media/aswin/SCFR/SCFR-main/
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
 
 time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 100 -outfmt 11 -num_threads 32 -out test.outfmt11
 blast_formatter -archive test.outfmt11 -outfmt 3 -line_length 280 -out test.outfmt3
@@ -22,7 +60,7 @@ time blastp -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_co
 # Convert your protein database (nr) into a DIAMOND format
 diamond makedb --in blast_nr_v4/nr.fasta -d nr_diamond_db
 
-#
+#Get fasta from pre-existing databases
 cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4
 blastdbcmd -db nr -entry all -outfmt %f -out nr.fasta
 diamond makedb --in nr.fasta --db nr_diamond_db
@@ -37,6 +75,18 @@ diamond blastp \
 --outfmt 6 \
 --more-sensitive
 
+
+diamond blastp \
+-q input.fa \
+-d nr_diamond_db \
+-o SCFR_protein_hits_sensitive.tsv \
+-e 0.001 \
+--max-target-seqs 100 \
+--max-hsps 3 \
+-p 32 \
+--more-sensitive \
+--matrix BLOSUM45 \
+--outfmt 6
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #
 
