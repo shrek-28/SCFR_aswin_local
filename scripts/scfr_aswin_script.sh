@@ -447,6 +447,27 @@ python3 compute_desert_stats.py gene_deserts/*.bed
 Rscript plot_gene_desert_stats.r all_desert_lengths.tsv
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------
+#Identify SCFRs in gene deserts
+
+cd /media/aswin/SCFR/SCFR-main/
+mkdir gene_deserts/SCFR_overlap_gene_deserts
+
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+for len in 0 100 500 1000 2500 5000 7500 10000
+do
+mkdir gene_deserts/SCFR_overlap_gene_deserts/$species
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_intronic_intergenic_gene_deserts.bed" -wa -wb > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_intronic_intergenic_gene_deserts_scfr_overlaps.out"
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_only_intergenic_gene_deserts.bed" -wa -wb > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_only_intergenic_gene_deserts_overlaps.out"
+done
+done
+
+#Summary of SCRR gene deserts at different length thresholds.
+
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------
 #10.3. Fishers test
 
 #Merge SCFRs into genome-wide intervals
@@ -514,6 +535,9 @@ sed "s/^/$species /g" $fisher | grep -v "Possible_intervals"
 done
 done | sed '1i Species Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/all_species_summary
 sort -k15,15V -k2,2n all_species_summary
+
+cd /media/aswin/SCFR/SCFR-main
+awk '$13<0.05' gene_deserts/fishers_test/all_species_summary > gene_deserts/fishers_test/scfr_significant_higher_overlaps_with_gene_deserts_than_expected
 
 ####################################################################################################################################################################################################################################################################################################################
 #11. Filter SCFRs that are part of coding region
@@ -754,6 +778,16 @@ done | column -t > all_length_thresholds_fourier_summary
 unset len
 cd /media/aswin/SCFR/SCFR-main
 done
+
+#Filter SCFRs with 3 periodocity
+cd /media/aswin/SCFR/SCFR-main
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+awk '$6~"0.33"' Fourier_analysis/$species/all_length_thresholds_fourier_summary > Fourier_analysis/$species/3_periodicity_scfrs
+done
+
+#Look at fourier periodicity in SCFRs located inside gene deserts
 
 #-----------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------
