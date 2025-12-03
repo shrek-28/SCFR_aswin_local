@@ -458,12 +458,14 @@ echo ">"$species
 for len in 0 100 500 1000 2500 5000 7500 10000
 do
 mkdir gene_deserts/SCFR_overlap_gene_deserts/$species
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_intronic_intergenic_gene_deserts.bed" -wa -wb > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_intronic_intergenic_gene_deserts_scfr_overlaps.out"
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_only_intergenic_gene_deserts.bed" -wa -wb > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_only_intergenic_gene_deserts_overlaps.out"
+#get overlaps & amount of overlap
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_intronic_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_intronic_intergenic_gene_deserts_scfr_overlaps.out"
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_only_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_only_intergenic_gene_deserts_overlaps.out"
 done
 done
 
 #Summary of SCRR gene deserts at different length thresholds.
+cd /media/aswin/SCFR/SCFR-main/
 
 
 
