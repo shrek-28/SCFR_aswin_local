@@ -15,7 +15,27 @@ blast_formatter -archive test.outfmt11 -outfmt 3 -line_length 280 -out test.outf
 blast_formatter -archive test.outfmt11 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
 | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > test.outfmt6
 
+time blastp -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 3 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/$scfrnoncan".outfmt6"
 
+
+# Convert your protein database (nr) into a DIAMOND format
+diamond makedb --in blast_nr_v4/nr.fasta -d nr_diamond_db
+
+#
+cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4
+blastdbcmd -db nr -entry all -outfmt %f -out nr.fasta
+diamond makedb --in nr.fasta --db nr_diamond_db
+
+diamond blastp \
+-q input.fa \
+-d nr_diamond_db \
+-o SCFR_protein_hits.tsv \
+-e 0.001 \
+--max-target-seqs 20 \
+-p 32 \
+--outfmt 6 \
+--more-sensitive
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #
