@@ -72,7 +72,43 @@ cat length_threshold_percent_genome_covered_summary | sed -n 4p | awk '!($1="")'
 #View higher strand asymmetry
 sed 's/ /_/g' genome_reports/GCA_029289425.3_bonobo.tsv | awk -F"\t" -v OFS="\t" '{ for(N=1; N<=NF; N++) if($N=="") $N="-" } 1' | awk '{print$9,$3,$4,$5,$11}' | sort -k5,5n | colnum.sh 
 
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#gene deserts scfr overlaps
 
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+mkdir gene_deserts/SCFR_overlap_gene_deserts/$species
+for len in 0 100 500 1000 2500 5000 7500 10000
+do
+(
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_only_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out"
+) &
+done
+wait
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+for len in 0 100 500 1000 2500 5000 7500 10000
+do
+(
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_intronic_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_intronic_intergenic_gene_deserts_scfr_overlaps.out"
+) &
+done
+wait
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+/media/aswin/SCFR/SCFR-main/PCA/human/5000/with_coding_region/NC_060928.1.fasta
 
 #DRAFT SCRIPTS
 ####################################################################################################################################################################################################################################################################################################################
