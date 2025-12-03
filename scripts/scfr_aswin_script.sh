@@ -499,6 +499,8 @@ name=$(echo $scfr | sed 's/^-/minus_/g' | cut -f1 -d "(" | tr ":-" "_" | sed 's/
 myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$chr".fasta" "$scfr"
 unset chr names
 done > SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa"
+#Check ORF
+ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_orf.fa"
 unset len
 done
 unset o
