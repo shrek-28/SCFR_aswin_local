@@ -512,7 +512,10 @@ unset chr names
 done > SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa"
 #Check ORF
 ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa"
+/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa"
 ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 1 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa"
+/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa"
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/subtract_fasta.py SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa" > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique_filtered.fa"
 unset len
 else :
 fi
@@ -655,7 +658,7 @@ awk '$13<0.05' gene_deserts/fishers_test/all_species_summary > gene_deserts/fish
 	done
 	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 	echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-	
+
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #9.2. #Get window-wise summary of SCFR count and length & it's overlap with whole genome & cds from all species (99.3667 mins)
 
