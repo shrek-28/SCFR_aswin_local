@@ -471,22 +471,23 @@ done
 
 #Summary of SCFRs in gene deserts at different length thresholds.
 cd /media/aswin/SCFR/SCFR-main/
-for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+time for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
 for o in $(find gene_deserts/SCFR_overlap_gene_deserts/$species -name "*_overlaps.out")
 do
 len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
 stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g' | sed "s/^/$species $len /g")
 echo $stats
+if [[ -z $stats ]]; then stats=$(echo $species $len "0 0 0 0 0 0"); else :; fi
 unset len stats
 done
 unset o
-done | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Median Avg Stddev' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
+done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Median Avg Stddev' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Identify genes in SCFRs overlapping gene deserts
 
-#7.4.1. Get fasta of overlapping SCFRs
+#7.4.1. Get fasta of overlapping SCFRs (12.1167 mins)
 
 cd /media/aswin/SCFR/SCFR-main/
 start_time=$(date +%s)
@@ -496,27 +497,32 @@ echo ">"$species
 cd gene_deserts/SCFR_overlap_gene_deserts/$species
 mkdir SCFR_fasta
 #for each length thresholds
-for o in $(find . -name "*_overlaps.out" | egrep "10000_only|5000_only|7500_only")
+for o in $(find . -name "*_overlaps.out" | grep "5000_only")
 do
 #Get fasta only of the overlap file is non-empty
-if [[ -s "$o" ]]; then
-len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
-#for each scfr
-for scfr in $(awk '{print$4"::"$1":"$2"-"$3"("substr($4,1,1)")"}' $o)
-do
-chr=$(echo $scfr | cut -f3 -d ":")
-name=$(echo $scfr | sed 's/^-/minus_/g' | cut -f1 -d "(" | tr ":-" "_" | sed 's/__/_/g')
-#myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$chr".fasta" "$scfr" > SCFR_fasta/$name".fa"
-myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$chr".fasta" "$scfr"
-unset chr names
-done > SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa"
-#Check ORF
-ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa"
-/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa"
-ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 1 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa"
-/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa"
-python3 /media/aswin/SCFR/SCFR-main/my_scripts/subtract_fasta.py SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa" > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique_filtered.fa"
-unset len
+	if [[ -s "$o" ]]; then
+	len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
+	#for each scfr
+	for scfr in $(awk '{print$4"::"$1":"$2"-"$3"("substr($4,1,1)")"}' $o)
+	do
+	chr=$(echo $scfr | cut -f3 -d ":")
+	name=$(echo $scfr | sed 's/^-/minus_/g' | cut -f1 -d "(" | tr ":-" "_" | sed 's/__/_/g')
+	#myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$chr".fasta" "$scfr" > SCFR_fasta/$name".fa"
+	myfasta -mfp /media/aswin/SCFR/SCFR-main/PCA/$species/$len/with_coding_region/$chr".fasta" "$scfr"
+	unset chr names
+	done > SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa"
+#Get canonical ORFs
+	ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa"
+#Get unique sequences
+	if [[ $species == "gorilla" ]]; then it="0.80"; else it="0.90"; fi
+	/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" $it
+#Get non-canonical ORFs
+	ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 1 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa"
+#Get unique sequences
+	/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa" $it
+#Remove canonical ORFs from non-canonical ORFs
+	python3 /media/aswin/SCFR/SCFR-main/my_scripts/subtract_fasta.py SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa" > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique_filtered.fa"
+unset len scfr it
 else :
 fi
 done
