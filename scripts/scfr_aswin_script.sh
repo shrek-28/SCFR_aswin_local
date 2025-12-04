@@ -478,7 +478,7 @@ do
 len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
 stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g' | sed "s/^/$species $len /g")
 echo $stats
-if [[ -z $stats ]]; then stats=$(echo $species $len "0 0 0 0 0 0"); else :; fi
+if [[ -s $stats ]]; then :; else stats=$(echo $species $len "0 0 0 0 0 0"); fi
 unset len stats
 done
 unset o
