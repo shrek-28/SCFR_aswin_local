@@ -541,6 +541,10 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #Download nr blastdb
 cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison
 time ./v5_download_nr_database.sh &> stdout_v5_download_nr_database
+cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb
+time blastdbcmd -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -entry all -outfmt "%f" -out extracted_nr.fasta
+time /media/aswin/programs/diamond makedb --in extracted_nr.fasta --db nr_diamond.dmnd --threads 32
+
 
 cd /media/aswin/SCFR/SCFR-main/
 start_time=$(date +%s)
