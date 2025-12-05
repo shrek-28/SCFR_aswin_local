@@ -201,9 +201,9 @@ ls | grep "_SCFR_all_frame_summary_all.csv" | xargs -n1 sh -c 'grep ALL $0 | sed
 	Rscript /media/aswin/SCFR/SCFR-main/my_scripts/plot_all_species_SCFR_length_stats.R all_scfr_length_stats.tsv all_scfr_length_stats.pdf
 
 ####################################################################################################################################################################################################################################################################################################################
-#5. Strand assymetry
+#5. Strand asymmetry
 
-#5.1. Get strand assymetry of SCFRs per chromosome (11.3 mins)
+#5.1. Get strand asymmetry of SCFRs per chromosome (11.3 mins)
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
@@ -964,7 +964,12 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #13. Identify proto-genes
 
 #
-/media/aswin/SCFR/SCFR-main/Fourier_analysis/human/3_periodicity_scfrs
+cd media/aswin/SCFR/SCFR-main
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+  do
+grep -f <(awk '{if($4~"-") print$1,$2,$3,"frame_"$4; else print$1,$2,$3,"frame"$4}' OFS="_" gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps.out" | tr -d "-" | tr "." "_") <(awk '$1=="with_coding_region" && $2=="5000"' Fourier_analysis/$species/all_length_thresholds_fourier_summary) > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps_fourier"
+done
+
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
