@@ -471,7 +471,7 @@ done
 
 #Summary of SCFRs in gene deserts at different length thresholds.
 cd /media/aswin/SCFR/SCFR-main/
-time for species in human
+time for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
 for o in $(find gene_deserts/SCFR_overlap_gene_deserts/$species -name "*_overlaps.out")
 do
