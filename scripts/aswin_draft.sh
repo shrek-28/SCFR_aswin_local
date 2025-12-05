@@ -47,7 +47,6 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 
-
 time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 100 -outfmt 11 -num_threads 32 -out test.outfmt11
 blast_formatter -archive test.outfmt11 -outfmt 3 -line_length 280 -out test.outfmt3
 blast_formatter -archive test.outfmt11 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
@@ -55,6 +54,10 @@ blast_formatter -archive test.outfmt11 -outfmt "6 stitle qseqid sseqid qlen leng
 
 time blastp -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 3 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
  | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > $species/SCFR_fasta/$scfrnoncan".outfmt6"
+
+time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 3 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' | tr " " "_" | column -t > test.outfmt6
+
 
 
 # Convert your protein database (nr) into a DIAMOND format
