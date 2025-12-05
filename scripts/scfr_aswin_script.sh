@@ -489,7 +489,7 @@ cd gene_deserts/SCFR_overlap_gene_deserts
 Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats.R summary_human.tsv human_scfr_gene_deserts_overlap_stats.pdf human
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#Identify genes in SCFRs overlapping gene deserts
+#Identify proto-genes or gene-like regions within SCFRs overlapping gene deserts
 
 #7.4.1. Get fasta of overlapping SCFRs (12.1167 mins)
 
@@ -501,7 +501,7 @@ echo ">"$species
 cd gene_deserts/SCFR_overlap_gene_deserts/$species
 mkdir SCFR_fasta
 #for each length thresholds
-for o in $(find . -name "*_overlaps.out" | grep "5000_only")
+for o in $(find . -name "*_overlaps.out" | grep "5000_only" | grep -v "fourier")
 do
 #Get fasta only of the overlap file is non-empty
 	if [[ -s "$o" ]]; then
@@ -518,7 +518,7 @@ do
 #Get canonical ORFs
 	ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa"
 #Get unique sequences
-	if [[ $species == "gorilla" ]]; then it="0.80"; else it="0.90"; fi
+	if [[ $species == "gorilla" || $species == "borangutan" || $species == "sorangutan" ]]; then it="0.80"; else it="0.90"; fi
 	/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" $it
 #Get non-canonical ORFs
 	ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 1 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa"
