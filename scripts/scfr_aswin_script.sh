@@ -471,18 +471,19 @@ done
 
 #Summary of SCFRs in gene deserts at different length thresholds.
 cd /media/aswin/SCFR/SCFR-main/
-time for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+time for species in human
 do
 for o in $(find gene_deserts/SCFR_overlap_gene_deserts/$species -name "*_overlaps.out")
 do
 len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
-stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g' | sed "s/^/$species $len /g")
+#stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g' | sed "s/^/$species $len /g")
+stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | python3 /media/aswin/SCFR/SCFR-main/my_scripts/get_stats.py | egrep "Count|^Minimum|^Maximum|^Mean|^Median|^Q1|^Q3" | awk -F ":" '{print$NF}' | tr -d " ," | paste -s -d " " | sed "s/^/$species $len /g")
+if [[ $(echo "$stats" | awk '{print NF}') -lt 3 ]]; then stats=$(echo $species $len "0 0 0 0 0 0 0"); else :; fi
 echo $stats
-if [[ -s $stats ]]; then :; else stats=$(echo $species $len "0 0 0 0 0 0"); fi
 unset len stats
 done
 unset o
-done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Median Avg Stddev' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
+done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Mean Q1 median Q3' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Identify genes in SCFRs overlapping gene deserts
