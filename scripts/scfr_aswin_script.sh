@@ -859,11 +859,12 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   echo ">"$species
 for fourier in $(find Fourier_analysis/$species/ -name "output_*.fasta" -type d)
 do
-(
-python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $fourier
-) &
+path=$(echo $fourier | awk -F "/" '!($NF="")' OFS="/")
+folder=$(echo $fourier | awk -F "/" '{print$NF}')
+cd $path
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder
+cd /media/aswin/SCFR/SCFR-main
 done
-wait
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
