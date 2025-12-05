@@ -538,6 +538,10 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 #7.4.2. Run nr blast locally
 
+#Download nr blastdb
+cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison
+time ./v5_download_nr_database.sh &> stdout_v5_download_nr_database
+
 cd /media/aswin/SCFR/SCFR-main/
 start_time=$(date +%s)
 #Don't use gorilla here
