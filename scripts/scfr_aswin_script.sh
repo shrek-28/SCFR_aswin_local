@@ -393,7 +393,6 @@ Rscript scripts/combined_2dhist.r
 #Print number of MUC gene members per species
 	for i in $(ls | grep "_genes_of_interest.txt"); do j=$(grep MUC -i $i -c); echo $i $j; unset j; done | column -t
 
-
 #######################################################################################################################################################################################################################################################################################################
 #7. Gene deserts
 
@@ -850,7 +849,7 @@ end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#11.2. Get chromosome-wise summary of fourier analysis
+#11.2. Get chromosome-wise summary of fourier analysis (14.3667 mins)
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
@@ -965,10 +964,10 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #13. Identify proto-genes
 
 #
-cd media/aswin/SCFR/SCFR-main
+cd /media/aswin/SCFR/SCFR-main
 for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
-grep -f <(awk '{if($4~"-") print$1,$2,$3,"frame_"$4; else print$1,$2,$3,"frame"$4}' OFS="_" gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps.out" | tr -d "-" | tr "." "_") <(awk '$1=="with_coding_region" && $2=="5000"' Fourier_analysis/$species/all_length_thresholds_fourier_summary) > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps_fourier"
+grep -f <(awk '{if($4~"-") print$1,$2,$3,"frame_"$4; else print$1,$2,$3,"frame"$4}' OFS="_" gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps.out" | tr -d "-" | tr "." "_") <(awk '$1=="with_coding_region" && $2=="5000"' Fourier_analysis/$species/all_length_thresholds_fourier_summary) > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_fourier_5000_only_intergenic_gene_deserts_overlaps.out"
 done
 
 
