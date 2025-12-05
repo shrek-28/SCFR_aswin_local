@@ -485,6 +485,10 @@ done
 unset o
 done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Mean Q1 median Q3' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
 
+#Plot overlap stats
+cd gene_deserts/SCFR_overlap_gene_deserts
+Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats.R summary_human.tsv human_scfr_gene_deserts_overlap_stats.pdf human
+
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Identify genes in SCFRs overlapping gene deserts
 
