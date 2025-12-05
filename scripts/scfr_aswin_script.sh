@@ -878,9 +878,10 @@ for len in 5000 7500 10000
 do
 for tsv in $(find $len -name "summary.tsv" -type f)
 do
+type=$(echo $tsv | cut -f2 -d "/")
 chr=$(echo $tsv | cut -f3 -d "/" | cut -f2,3 -d "_" | sed 's/\.fasta//g')
-grep -v "Num_Raw_Peaks" $tsv | sed "s/^/$len\t$chr\t/g"
-unset chr
+grep -v "Num_Raw_Peaks" $tsv | sed "s/^/$type\t$len\t$chr\t/g"
+unset chr type
 done
 unset tsv
 done | column -t > all_length_thresholds_fourier_summary
