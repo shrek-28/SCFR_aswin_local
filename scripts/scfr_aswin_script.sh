@@ -447,8 +447,10 @@ done
 
 #Plot data
 cd /media/aswin/SCFR/SCFR-main/
-python3 compute_desert_stats.py gene_deserts/*.bed
-Rscript plot_gene_desert_stats.r all_desert_lengths.tsv
+python3 my_scripts/compute_desert_stats.py gene_deserts/*_only_intergenic_gene_deserts.bed
+sed -e 's/_only_intergenic_gene_deserts.bed//g' -e 's/sorangutan/Sumatran orangutan/g' -e 's/borangutan/Bornean orangutan/g' desert_summary.tsv -i
+sed '/species/! s/^\(.\)/\U\1/' desert_summary.tsv -i
+Rscript my_scripts/plot_gene_desert_stats.r desert_summary.tsv gene_deserts/all_speices_length_distribution_gene_deserts.pdf
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #7.3. Identify SCFRs in gene deserts
