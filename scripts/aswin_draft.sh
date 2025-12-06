@@ -12,9 +12,11 @@ time /media/aswin/programs/diamond blastp \
   --query test.fa \
   --query-cover 70 \
   --faster \
+  --block-size 80 \
+  --masking 0 \
   --out results.tsv \
   --outfmt 6 \
-  --threads 32 
+  --threads 32
 
 cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts/ncbi_nr_search
 time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -out results.blastp.out -evalue 0.001 -max_target_seqs 100 -outfmt 6 -num_threads 32
