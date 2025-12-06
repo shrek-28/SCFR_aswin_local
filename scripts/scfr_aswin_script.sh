@@ -457,8 +457,12 @@ for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
 cd gene_deserts
 rf=$(ls | grep "_only_intergenic_intergenic_regions.tsv" | grep $species)
-
-python3 my_scripts/compute_desert_stats.py gene_deserts/*_only_intergenic_intergenic_regions.tsv
+awk '!/zscore/ {print$3-$2}' $rf | python3 /media/aswin/SCFR/SCFR-main/my_scripts/get_stats.py | egrep "Count|^Minimum|^Maximum|^Mean|^Median|^Q1|^Q3" | awk -F ":" '{print$NF}' | tr -d " ," | paste -s -d " " | sed "s/^/$species /g"
+cd /media/aswin/SCFR/SCFR-main/
+done | sort -k1,1 -k2,2n | sed '1i species N min max mean q1 median q3' | tr " " "\t" > intergenic_region_summary.tsv
+sed -e 's/_only_intergenic_gene_deserts.bed//g' -e 's/sorangutan/Sumatran orangutan/g' -e 's/borangutan/Bornean orangutan/g' intergenic_region_summary.tsv -i
+sed '/species/! s/^\(.\)/\U\1/' intergenic_region_summary.tsv -i
+Rscript my_scripts/plot_intergenic_stats.r intergenic_region_summary.tsv gene_deserts/all_speices_length_distribution_intergenic_regions.pdf
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #7.3. Identify SCFRs in gene deserts
