@@ -1008,9 +1008,9 @@ done
 cd /media/aswin/SCFR/SCFR-main
 time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
-echo ">"$species
-input=$(find Fourier_analysis/genes/$species/output_GCF_*_cds.fa_filtered.fa/chromosome_wise_summary/ -name "summary.tsv")
+input=$(find Fourier_analysis/genes/$species/output_GCF_*_cds.fa*/chromosome_wise_summary/ -name "summary.tsv")
 output="Fourier_analysis/genes/$species/${species}_all_genes_freq_mag.tsv"
+echo -e ">"$species "\n -input: "$input "\n -output:"$output
 my_scripts/extract_fourier_freq_mag_from_summary.sh $input $output
 unset input output
 done
@@ -1028,6 +1028,12 @@ done
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
+#Download Repeats
+
+mkdir /media/aswin/SCFR/SCFR-main/Repeats
+wget https://hgdownload.soe.ucsc.edu/hubs/GCA/029/281/585/GCA_029281585.3/GCA_029281585.3.repeatMasker.out.gz
+wget https://hgdownload.soe.ucsc.edu/hubs/GCA/029/281/585/GCA_029281585.3/GCA_029281585.3.repeatModeler.out.gz
+wget https://hgdownload.soe.ucsc.edu/hubs/GCA/029/281/585/GCA_029281585.3/GCA_029281585.3.repeatModeler.families.fa.gz
 
 rm temp_*.csv
 rm tmp.*.fai
