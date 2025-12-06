@@ -445,12 +445,20 @@ for f in SCFR_all/*SCFR_all.out; do
     awk 'BEGIN{OFS="\t"} {print $1,$2,$3}' "$f" > SCFR_all/${species}_SCFR_all.bed
 done
 
-#Plot data
+#Plot length stats
 cd /media/aswin/SCFR/SCFR-main/
 python3 my_scripts/compute_desert_stats.py gene_deserts/*_only_intergenic_gene_deserts.bed
 sed -e 's/_only_intergenic_gene_deserts.bed//g' -e 's/sorangutan/Sumatran orangutan/g' -e 's/borangutan/Bornean orangutan/g' desert_summary.tsv -i
 sed '/species/! s/^\(.\)/\U\1/' desert_summary.tsv -i
 Rscript my_scripts/plot_gene_desert_stats.r desert_summary.tsv gene_deserts/all_speices_length_distribution_gene_deserts.pdf
+
+cd /media/aswin/SCFR/SCFR-main/
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+cd gene_deserts
+rf=$(ls | grep "_only_intergenic_intergenic_regions.tsv" | grep $species)
+
+python3 my_scripts/compute_desert_stats.py gene_deserts/*_only_intergenic_intergenic_regions.tsv
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #7.3. Identify SCFRs in gene deserts
@@ -556,6 +564,7 @@ time ./v5_download_nr_database.sh &> stdout_v5_download_nr_database
 cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb
 time blastdbcmd -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -entry all -outfmt "%f" -out extracted_nr.fasta
 time /media/aswin/programs/diamond makedb --in extracted_nr.fasta --db nr_diamond.dmnd --threads 32
+#/media/aswin/programs/diamond makedb --in nr.fasta --db nr_tax_db.dmnd --taxon-map prot.accession2taxid.gz --taxon-nodes taxid.map --threads 32
 
 
 cd /media/aswin/SCFR/SCFR-main/
@@ -650,14 +659,14 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	done
 
 #Combine all species summary
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
-do
-for fisher in $(find gene_deserts/fishers_test/ -name $species"_fisher_test_summary")
-do
-sed "s/^/$species /g" $fisher | grep -v "Possible_intervals"
-done
-done | sed '1i Species Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/all_species_summary
-sort -k15,15V -k2,2n all_species_summary
+	for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	for fisher in $(find gene_deserts/fishers_test/ -name $species"_fisher_test_summary")
+	do
+	sed "s/^/$species /g" $fisher | grep -v "Possible_intervals"
+	done
+	done | sed '1i Species Query DB #Query_intervals #DB_intervals #Overlaps #Possible_intervals in_a_in_b in_a_not_in_b not_in_a_in_b not_in_a_not_in_b left_pvalue right_pvalue two_tail_pvalue ratio' | column -t > /media/aswin/SCFR/SCFR-main/gene_deserts/fishers_test/all_species_summary
+	sort -k15,15V -k2,2n all_species_summary
 
 cd /media/aswin/SCFR/SCFR-main
 awk '$13<0.05' gene_deserts/fishers_test/all_species_summary > gene_deserts/fishers_test/scfr_significant_higher_overlaps_with_gene_deserts_than_expected
@@ -881,7 +890,7 @@ do
 path=$(echo $fourier | awk -F "/" '!($NF="")' OFS="/")
 folder=$(echo $fourier | awk -F "/" '{print$NF}')
 cd $path
-python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder --top 3 --cores 3
 cd /media/aswin/SCFR/SCFR-main
 done
 done
@@ -979,6 +988,18 @@ for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#Summary chromosome-wise summary 
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo ">"$species
+	cd Fourier_analysis/genes/$species
+	folder=$(ls | grep "output_GCF_*_cds.fa_filtered.fa")
+	python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder --top 3 --cores 32
+	cd /media/aswin/SCFR/SCFR-main
+done
 
 ####################################################################################################################################################################################################################################################################################################################
 #13. Identify proto-genes
