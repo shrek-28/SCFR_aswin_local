@@ -2,9 +2,19 @@
 #DRAFT SCRIPTS
 #############################################################################################################################################################################################################################################################################################################
 
+time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o output_sorangutan_5000_overlapping_scfrs_canonical_orf_unique.fa -t 32 sorangutan_5000_overlapping_scfrs_canonical_orf_unique.fa
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #BLAST SCFR against nr database
+
+time /media/aswin/programs/diamond blastp \
+  --db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr_diamond.dmnd \
+  --query test.fa \
+  --query-cover 70 \
+  --faster \
+  --out results.tsv \
+  --outfmt 6 \
+  --threads 32 
 
 cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts/ncbi_nr_search
 time blastp -query test.fa -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -out results.blastp.out -evalue 0.001 -max_target_seqs 100 -outfmt 6 -num_threads 32
