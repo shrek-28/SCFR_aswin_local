@@ -1009,7 +1009,10 @@ cd /media/aswin/SCFR/SCFR-main
 time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 echo ">"$species
-my_scripts/extract_fourier_freq_mag_from_summary.sh Fourier_analysis/genes/$species/output_GCF_*_cds.fa_filtered.fa/chromosome_wise_summary/summary.tsv Fourier_analysis/genes/$species/$species"_all_genes_freq_mag.tsv"
+input=$(find Fourier_analysis/genes/$species/output_GCF_*_cds.fa_filtered.fa/chromosome_wise_summary/ -name "summary.tsv")
+output="Fourier_analysis/genes/$species/${species}_all_genes_freq_mag.tsv"
+my_scripts/extract_fourier_freq_mag_from_summary.sh $input $output
+unset input output
 done
 
 ####################################################################################################################################################################################################################################################################################################################
