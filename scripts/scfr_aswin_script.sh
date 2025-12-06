@@ -474,50 +474,50 @@ done
 cd /media/aswin/SCFR/SCFR-main/
 mkdir gene_deserts/SCFR_overlap_gene_deserts
 
-for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
-do
-echo ">"$species
-for len in 0 100 500 1000 2500 5000 7500 10000
-do
-mkdir gene_deserts/SCFR_overlap_gene_deserts/$species
-#get overlaps & amount of overlap
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_intronic_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_intronic_intergenic_gene_deserts_scfr_overlaps.out"
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_only_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_only_intergenic_gene_deserts_overlaps.out"
-done
-done
+	for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+	do
+	echo ">"$species
+	for len in 0 100 500 1000 2500 5000 7500 10000
+	do
+	mkdir gene_deserts/SCFR_overlap_gene_deserts/$species
+	#get overlaps & amount of overlap
+	/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_intronic_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_intronic_intergenic_gene_deserts_scfr_overlaps.out"
+	/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a SCFR_lists/$len/$species"_SCFR_atleast_"$len".out" -b gene_deserts/fishers_test/$species/$species"_only_intergenic_gene_deserts.bed" -wo > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_only_intergenic_gene_deserts_overlaps.out"
+	done
+	done
 
 #Summary of SCFRs in gene deserts at different length thresholds (16m3.864s mins)
-cd /media/aswin/SCFR/SCFR-main/
-time for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
-do
-for o in $(find gene_deserts/SCFR_overlap_gene_deserts/$species -name "*_overlaps.out")
-do
-len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
-#stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g' | sed "s/^/$species $len /g")
-stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | python3 /media/aswin/SCFR/SCFR-main/my_scripts/get_stats.py | egrep "Count|^Minimum|^Maximum|^Mean|^Median|^Q1|^Q3" | awk -F ":" '{print$NF}' | tr -d " ," | paste -s -d " " | sed "s/^/$species $len /g")
-if [[ $(echo "$stats" | awk '{print NF}') -lt 3 ]]; then stats=$(echo $species $len "0 0 0 0 0 0 0"); else :; fi
-echo $stats
-unset len stats
-done
-unset o
-done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Mean Q1 median Q3' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
+	cd /media/aswin/SCFR/SCFR-main/
+	time for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+	do
+	for o in $(find gene_deserts/SCFR_overlap_gene_deserts/$species -name "*_overlaps.out")
+	do
+	len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
+	#stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g' | sed "s/^/$species $len /g")
+	stats=$(awk '{print$NF}' gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_"$len"_only_intergenic_gene_deserts_overlaps.out" | python3 /media/aswin/SCFR/SCFR-main/my_scripts/get_stats.py | egrep "Count|^Minimum|^Maximum|^Mean|^Median|^Q1|^Q3" | awk -F ":" '{print$NF}' | tr -d " ," | paste -s -d " " | sed "s/^/$species $len /g")
+	if [[ $(echo "$stats" | awk '{print NF}') -lt 3 ]]; then stats=$(echo $species $len "0 0 0 0 0 0 0"); else :; fi
+	echo $stats
+	unset len stats
+	done
+	unset o
+	done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Mean Q1 median Q3' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
 
 #Plot overlap stats
-cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts
-for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
-do
-echo ">"$species
-grep "$species" all_species_scfr_gene_deserts_overlap_summary | awk '!($1="")' | sed 's/^[ ]\+//g' | sed '1i Length_threshold N min max mean q1 median q3' | tr " " "\t" > summary_"$species".tsv
-if  [[ "$species" == "human" ]]; then
-Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
-else
-Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats_extended.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
-fi
-#rm summary_"$species".tsv
-done
+	cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts
+	for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+	do
+	echo ">"$species
+	grep "$species" all_species_scfr_gene_deserts_overlap_summary | awk '!($1="")' | sed 's/^[ ]\+//g' | sed '1i Length_threshold N min max mean q1 median q3' | tr " " "\t" > summary_"$species".tsv
+	if  [[ "$species" == "human" ]]; then
+	Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
+	else
+	Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats_extended.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
+	fi
+	rm summary_"$species".tsv
+	done
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#Identify proto-genes or gene-like regions within SCFRs overlapping gene deserts
+#7.4. Identify proto-genes or gene-like regions within SCFRs overlapping gene deserts
 
 #7.4.1. Get fasta of overlapping SCFRs (12.1167 mins)
 
@@ -567,46 +567,42 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 #7.4.2. Run nr blast locally
 
 #Download nr blastdb
-cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison
-time ./v5_download_nr_database.sh &> stdout_v5_download_nr_database
-cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb
-time blastdbcmd -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -entry all -outfmt "%f" -out extracted_nr.fasta
-time /media/aswin/programs/diamond makedb --in extracted_nr.fasta --db nr_diamond.dmnd --threads 32
-#/media/aswin/programs/diamond makedb --in nr.fasta --db nr_tax_db.dmnd --taxon-map prot.accession2taxid.gz --taxon-nodes taxid.map --threads 32
+	cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison
+	time ./v5_download_nr_database.sh &> stdout_v5_download_nr_database
+	#cd /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb
+	#time blastdbcmd -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -entry all -outfmt "%f" -out extracted_nr.fasta
+	#time /media/aswin/programs/diamond makedb --in extracted_nr.fasta --db nr_diamond.dmnd --threads 32
+	#/media/aswin/programs/diamond makedb --in nr.fasta --db nr_tax_db.dmnd --taxon-map prot.accession2taxid.gz --taxon-nodes taxid.map --threads 32
 
-
-cd /media/aswin/SCFR/SCFR-main/
-start_time=$(date +%s)
-#Don't use gorilla here
-for species in human chimpanzee bonobo gibbon borangutan sorangutan
-do
-echo ">"$species
-cd gene_deserts/SCFR_overlap_gene_deserts/
-mkdir $species/SCFR_fasta/v4
-for path in $(find $species/SCFR_fasta -name "*_overlapping_scfrs_canonical_orf.fa")
-do
-can=$(echo $path)
-noncan=$(echo $path | sed 's/_canonical_/_non_canonical_/g')
-scfrcan=$(echo $path | awk -F "/" '{print$NF}')
-echo " - "$scfrcan
-#Run blast on canonical ORFs
-time blastp -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.0001 -max_target_seqs 20 -max_hsps 3 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
- | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/v4/$scfrcan".outfmt6"
-#Run blast on non-canonical ORFs
-fnoncan=$(echo $noncan | sed 's/_non_canonical_orf.fa/_non_canonical_filtered_orf.fa/g')
-python3 /media/aswin/SCFR/SCFR-main/my_scripts/subtract_fasta.py $can $noncan > $fnoncan
-scfrnoncan=$(echo $fnoncan | awk -F "/" '{print$NF}')
-time blastp -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/blast_nr_v4/nr -evalue 0.0001 -max_target_seqs 20 -max_hsps 3 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
- | sed '1i Sub_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/v4/$scfrnoncan".outfmt6"
-unset can noncan scfrcan fnoncan scfrnoncan
-done
-cd /media/aswin/SCFR/SCFR-main/
-done
-end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+#Run blastp
+	cd /media/aswin/SCFR/SCFR-main/
+	start_time=$(date +%s)
+	#Don't use gorilla here
+	for species in human chimpanzee bonobo gibbon borangutan sorangutan
+	do
+	echo ">"$species
+	cd gene_deserts/SCFR_overlap_gene_deserts/
+	mkdir $species/SCFR_fasta/nr_blast
+	for path in $(find $species/SCFR_fasta -name "*_5000_overlapping_scfrs_canonical_orf_unique.fa")
+	do
+	can=$(echo $path)
+	scfrcan=$(echo $can | awk -F "/" '{print$NF}')
+	noncan=$(echo $can | sed 's/_canonical_orf_unique.fa/_non_canonical_orf_unique_filtered.fa/g')
+	scfrnoncan=$(echo $noncan | awk -F "/" '{print$NF}')
+	echo " - "$scfrcan
+	#Run blast on canonical ORFs
+	time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+	 | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrcan".outfmt6"
+	#Run blast on non-canonical ORFs
+	time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+	 | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrnoncan".outfmt6"
+	unset can scfrcan noncan scfrnoncan
+	done
+	cd /media/aswin/SCFR/SCFR-main/
+	done
+	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
-
-
-
+ 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #8. Fishers test
 
@@ -997,15 +993,23 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
-#Summary chromosome-wise summary 
+#Summary chromosome-wise summary (113 mins)
 cd /media/aswin/SCFR/SCFR-main
-time for species in bonobo chimpanzee gorilla borangutan sorangutan gibbon
+time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 	do
 	echo ">"$species
 	cd Fourier_analysis/genes/$species
 	folder=$(ls | grep "output_GCF_.*_cds.fa")
 	python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder --top 3 --cores 32
 	cd /media/aswin/SCFR/SCFR-main
+done
+
+#Plot frequency Vs amplitude
+cd /media/aswin/SCFR/SCFR-main
+time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">"$species
+my_scripts/extract_fourier_freq_mag_from_summary.sh Fourier_analysis/genes/$species/output_GCF_*_cds.fa_filtered.fa/chromosome_wise_summary/summary.tsv Fourier_analysis/genes/$species/$species"_all_genes_freq_mag.tsv"
 done
 
 ####################################################################################################################################################################################################################################################################################################################
