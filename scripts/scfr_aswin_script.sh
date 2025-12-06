@@ -445,26 +445,30 @@ for f in SCFR_all/*SCFR_all.out; do
     awk 'BEGIN{OFS="\t"} {print $1,$2,$3}' "$f" > SCFR_all/${species}_SCFR_all.bed
 done
 
-#Plot length stats
-cd /media/aswin/SCFR/SCFR-main/
-python3 my_scripts/compute_desert_stats.py gene_deserts/*_only_intergenic_gene_deserts.bed
-sed -e 's/_only_intergenic_gene_deserts.bed//g' -e 's/sorangutan/Sumatran orangutan/g' -e 's/borangutan/Bornean orangutan/g' desert_summary.tsv -i
-sed '/species/! s/^\(.\)/\U\1/' desert_summary.tsv -i
-Rscript my_scripts/plot_gene_desert_stats.r desert_summary.tsv gene_deserts/all_speices_length_distribution_gene_deserts.pdf
+#7.3. Plot length stats
+	#Gene deserts
+	cd /media/aswin/SCFR/SCFR-main/
+	python3 my_scripts/compute_desert_stats.py gene_deserts/*_only_intergenic_gene_deserts.bed
+	sed -e 's/_only_intergenic_gene_deserts.bed//g' -e 's/sorangutan/Sumatran orangutan/g' -e 's/borangutan/Bornean orangutan/g' desert_summary.tsv -i
+	sed '/species/! s/^\(.\)/\U\1/' desert_summary.tsv -i
+	Rscript my_scripts/plot_gene_desert_stats.r desert_summary.tsv gene_deserts/all_speices_length_distribution_gene_deserts.pdf
+	
+	#Intergenic
+	cd /media/aswin/SCFR/SCFR-main/
+	for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+	do
+	cd gene_deserts
+	rf=$(ls | grep "_only_intergenic_intergenic_regions.tsv" | grep $species)
+	awk '!/zscore/ {print$3-$2}' $rf | python3 /media/aswin/SCFR/SCFR-main/my_scripts/get_stats.py | egrep "Count|^Minimum|^Maximum|^Mean|^Median|^Q1|^Q3" | awk -F ":" '{print$NF}' | tr -d " ," | paste -s -d " " | sed "s/^/$species /g"
+	cd /media/aswin/SCFR/SCFR-main/
+	done | sort -k1,1 -k2,2n | sed '1i species N min max mean q1 median q3' | tr " " "\t" > intergenic_region_summary.tsv
+	sed -e 's/_only_intergenic_gene_deserts.bed//g' -e 's/sorangutan/Sumatran orangutan/g' -e 's/borangutan/Bornean orangutan/g' intergenic_region_summary.tsv -i
+	sed '/species/! s/^\(.\)/\U\1/' intergenic_region_summary.tsv -i
+	Rscript my_scripts/plot_intergenic_stats.r intergenic_region_summary.tsv gene_deserts/all_speices_length_distribution_intergenic_regions.pdf
+	
+	mv desert_summary.tsv intergenic_region_summary.tsv gene_deserts/
 
-cd /media/aswin/SCFR/SCFR-main/
-for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
-do
-cd gene_deserts
-rf=$(ls | grep "_only_intergenic_intergenic_regions.tsv" | grep $species)
-awk '!/zscore/ {print$3-$2}' $rf | python3 /media/aswin/SCFR/SCFR-main/my_scripts/get_stats.py | egrep "Count|^Minimum|^Maximum|^Mean|^Median|^Q1|^Q3" | awk -F ":" '{print$NF}' | tr -d " ," | paste -s -d " " | sed "s/^/$species /g"
-cd /media/aswin/SCFR/SCFR-main/
-done | sort -k1,1 -k2,2n | sed '1i species N min max mean q1 median q3' | tr " " "\t" > intergenic_region_summary.tsv
-sed -e 's/_only_intergenic_gene_deserts.bed//g' -e 's/sorangutan/Sumatran orangutan/g' -e 's/borangutan/Bornean orangutan/g' intergenic_region_summary.tsv -i
-sed '/species/! s/^\(.\)/\U\1/' intergenic_region_summary.tsv -i
-Rscript my_scripts/plot_intergenic_stats.r intergenic_region_summary.tsv gene_deserts/all_speices_length_distribution_intergenic_regions.pdf
-
-#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+####################################################################################################################################################################################################################################################################################################################
 #7.3. Identify SCFRs in gene deserts
 
 cd /media/aswin/SCFR/SCFR-main/
@@ -995,12 +999,11 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 #Summary chromosome-wise summary 
 cd /media/aswin/SCFR/SCFR-main
-start_time=$(date +%s)
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+time for species in bonobo chimpanzee gorilla borangutan sorangutan gibbon
 	do
 	echo ">"$species
 	cd Fourier_analysis/genes/$species
-	folder=$(ls | grep "output_GCF_*_cds.fa_filtered.fa")
+	folder=$(ls | grep "output_GCF_.*_cds.fa")
 	python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder --top 3 --cores 32
 	cd /media/aswin/SCFR/SCFR-main
 done
@@ -1008,7 +1011,7 @@ done
 ####################################################################################################################################################################################################################################################################################################################
 #13. Identify proto-genes
 
-#
+#Get fourier peak freq of SCFRs overlapping gene deserts
 cd /media/aswin/SCFR/SCFR-main
 time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
@@ -1019,4 +1022,5 @@ done
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
 
-
+rm temp_*.csv
+rm tmp.*.fai
