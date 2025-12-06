@@ -468,7 +468,7 @@ mkdir gene_deserts/SCFR_overlap_gene_deserts/$species
 done
 done
 
-#Summary of SCFRs in gene deserts at different length thresholds.
+#Summary of SCFRs in gene deserts at different length thresholds (16m3.864s mins)
 cd /media/aswin/SCFR/SCFR-main/
 time for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
@@ -485,8 +485,18 @@ unset o
 done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Mean Q1 median Q3' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
 
 #Plot overlap stats
-cd gene_deserts/SCFR_overlap_gene_deserts
-Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats.R summary_human.tsv human_scfr_gene_deserts_overlap_stats.pdf human
+cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+grep "$species" all_species_scfr_gene_deserts_overlap_summary | awk '!($1="")' | sed 's/^[ ]\+//g' | sed '1i Length_threshold N min max mean q1 median q3' | tr " " "\t" > summary_"$species".tsv
+if  [[ "$species" == "human" ]]; then
+Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
+else
+Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats_extended.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
+fi
+#rm summary_"$species".tsv
+done
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Identify proto-genes or gene-like regions within SCFRs overlapping gene deserts
@@ -973,9 +983,9 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 #
 cd /media/aswin/SCFR/SCFR-main
-for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
-grep -f <(awk '{if($4~"-") print$1,$2,$3,"frame_"$4; else print$1,$2,$3,"frame"$4}' OFS="_" gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps.out" | tr -d "-" | tr "." "_") <(awk '$1=="with_coding_region" && $2=="5000"' Fourier_analysis/$species/all_length_thresholds_fourier_summary) > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_fourier_5000_only_intergenic_gene_deserts_overlaps.out"
+grep -f <(awk '{if($4~"-") print$1,$2,$3,"frame_"$4; else print$1,$2,$3,"frame"$4}' OFS="_" gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps.out" | tr -d "-" | tr "." "_") <(awk '$1=="with_coding_region" && $2=="5000"' Fourier_analysis/$species/all_length_thresholds_fourier_summary) > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps_fourier.out"
 done
 
 
