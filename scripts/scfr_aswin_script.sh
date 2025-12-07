@@ -578,7 +578,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	cd /media/aswin/SCFR/SCFR-main/
 	start_time=$(date +%s)
 	#Don't use gorilla here
-	for species in human chimpanzee bonobo gibbon borangutan sorangutan
+	for species in human chimpanzee bonobo gibbon borangutan sorangutan gorilla
 	do
 	echo ">"$species
 	cd gene_deserts/SCFR_overlap_gene_deserts/
@@ -1010,10 +1010,16 @@ time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 do
 input=$(find Fourier_analysis/genes/$species/output_GCF_*_cds.fa*/chromosome_wise_summary/ -name "summary.tsv")
 output="Fourier_analysis/genes/$species/${species}_all_genes_freq_mag.tsv"
+output2="Fourier_analysis/genes/$species/${species}_all_genes_positive_freq_mag.tsv"
 echo -e ">"$species "\n -input: "$input "\n -output:"$output
 my_scripts/extract_fourier_freq_mag_from_summary.sh $input $output
-unset input output
+awk '$2!~"-"' $output > $output2
+sed 's/^SCFR_Name/Gene/g' $output -i
+sed 's/^SCFR_Name/Gene/g' $output2 -i
+unset input output output2
 done
+
+
 
 ####################################################################################################################################################################################################################################################################################################################
 #13. Identify proto-genes
