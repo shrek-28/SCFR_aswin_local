@@ -471,8 +471,10 @@ done
 for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
 gs=$(awk '{a+=$2} END{print a}' ../genome_sizes/"$species".genome)
-gds=$(awk '{print $3-$2}' "$species"_only_intergenic_gene_deserts.bed | awk '{a+=$1} END{print a}')
+gds=$(bedtools merge -i "$species"_only_intergenic_gene_deserts.bed | awk '{print $3-$2}' | awk '{a+=$1} END{print a}')
 pgbygd=$(cal $gds / $gs | tr -d "~" | awk '{print$1*100}' | awk '{$NF+=0}1' CONVFMT="%.2f")
+scfrs=$(awk '{print$3-$2}' SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out | awk '{a+=$1} END{print a}')
+pgdbyscfrs=$(awk '{print$3-$2}' SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out | awk '{a+=$1} END{print a}')
 
 
 ####################################################################################################################################################################################################################################################################################################################
