@@ -594,7 +594,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
 	 | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrcan".outfmt6"
 	#Run blast on non-canonical ORFs
-	time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $fnoncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+	time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $noncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
 	 | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrnoncan".outfmt6"
 	unset can scfrcan noncan scfrnoncan
 	done
@@ -602,7 +602,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	done
 	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
- 
+
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #8. Fishers test
 
