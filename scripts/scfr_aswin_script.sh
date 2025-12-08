@@ -1050,7 +1050,6 @@ time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 grep -f <(awk '{if($4~"-") print$1,$2,$3,"frame_"$4; else print$1,$2,$3,"frame"$4}' OFS="_" gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps.out" | tr -d "-" | tr "." "_") <(awk '$1=="with_coding_region" && $2=="5000"' Fourier_analysis/$species/all_length_thresholds_fourier_summary) > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps_fourier.out"
 done
 
-
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
 #Download Repeats
