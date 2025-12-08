@@ -583,33 +583,35 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	#time /media/aswin/programs/diamond makedb --in extracted_nr.fasta --db nr_diamond.dmnd --threads 32
 	#/media/aswin/programs/diamond makedb --in nr.fasta --db nr_tax_db.dmnd --taxon-map prot.accession2taxid.gz --taxon-nodes taxid.map --threads 32
 
+#2451.38 mins / 40.8564 hours / 1.70235 days
+
 #Run blastp
-	cd /media/aswin/SCFR/SCFR-main/
-	start_time=$(date +%s)
-	#Don't use gorilla here
-	for species in human chimpanzee bonobo gibbon borangutan sorangutan gorilla
-	do
-	echo ">"$species
-	cd gene_deserts/SCFR_overlap_gene_deserts/
-	mkdir $species/SCFR_fasta/nr_blast
-	for path in $(find $species/SCFR_fasta -name "*_5000_overlapping_scfrs_canonical_orf_unique.fa")
-	do
-	can=$(echo $path)
-	scfrcan=$(echo $can | awk -F "/" '{print$NF}')
-	noncan=$(echo $can | sed 's/_canonical_orf_unique.fa/_non_canonical_orf_unique_filtered.fa/g')
-	scfrnoncan=$(echo $noncan | awk -F "/" '{print$NF}')
-	echo " - "$scfrcan
-	#Run blast on canonical ORFs
-	time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
-	 | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrcan".outfmt6"
-	#Run blast on non-canonical ORFs
-	time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $noncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
-	 | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrnoncan".outfmt6"
-	unset can scfrcan noncan scfrnoncan
-	done
-	cd /media/aswin/SCFR/SCFR-main/
-	done
-	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+cd /media/aswin/SCFR/SCFR-main/
+start_time=$(date +%s)
+#Don't use gorilla here
+for species in gorilla
+do
+echo ">"$species
+cd gene_deserts/SCFR_overlap_gene_deserts/
+mkdir $species/SCFR_fasta/nr_blast
+for path in $(find $species/SCFR_fasta -name "*_5000_overlapping_scfrs_canonical_orf_unique.fa")
+do
+can=$(echo $path)
+scfrcan=$(echo $can | awk -F "/" '{print$NF}')
+noncan=$(echo $can | sed 's/_canonical_orf_unique.fa/_non_canonical_orf_unique_filtered.fa/g')
+scfrnoncan=$(echo $noncan | awk -F "/" '{print$NF}')
+echo " - "$scfrcan
+#Run blast on canonical ORFs
+time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $can -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrcan".outfmt6"
+#Run blast on non-canonical ORFs
+#time /media/aswin/programs/ncbi-blast-2.16.0+/bin/blastp -task blastp-fast -query $noncan -db /media/aswin/gene_loss/APOBEC1/bird_mammal_A1_comparison/v5_nr_blastdb/nr -evalue 0.001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 32 -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand" \
+ #| sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\n' > $species/SCFR_fasta/nr_blast/$scfrnoncan".outfmt6"
+unset can scfrcan noncan scfrnoncan
+done
+cd /media/aswin/SCFR/SCFR-main/
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #Time taken: 
