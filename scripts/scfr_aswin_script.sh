@@ -603,6 +603,11 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#Time taken: 
+	#borangutan_5000_overlapping_scfrs_canonical_orf_unique.fa (985m37.837s), gibbon_5000_overlapping_scfrs_canonical_orf_unique.fa (49m0.796s), bonobo_5000_overlapping_scfrs_canonical_orf_unique.fa (150m23.588s)
+	#chimpanzee_5000_overlapping_scfrs_canonical_orf_unique.fa (102m24.520s), human_5000_overlapping_scfrs_canonical_orf_unique.fa (104m32.931s)
+
+
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #8. Fishers test
 
@@ -1016,10 +1021,15 @@ my_scripts/extract_fourier_freq_mag_from_summary.sh $input $output
 awk '$2!~"-"' $output > $output2
 sed 's/^SCFR_Name/Gene/g' $output -i
 sed 's/^SCFR_Name/Gene/g' $output2 -i
+Rscript /media/aswin/SCFR/SCFR-main/my_scripts/plot_heatmap_fourier_peaks_genes.R $output2 "$species"_all_genes_positive_freq_mag.pdf
 unset input output output2
 done
 
+Rscript /media/aswin/SCFR/SCFR-main/my_scripts/plot_heatmap_fourier_peaks_genes.R human_all_genes_positive_freq_mag.tsv human_all_genes_positive_freq_mag.pdf
 
+cd /media/aswin/SCFR/SCFR-main/Fourier_analysis/genes
+time find . -maxdepth 2 -mindepth 2 -name "*_all_genes_positive_freq_mag.tsv" | xargs -n1 sh -c 'grep -v "Magnitude" $0' | sed '1i Gene Frequency Magnitude' | sed 's/ /\t/g' > all_species_all_genes_positive_freq_mag.tsv
+Rscript /media/aswin/SCFR/SCFR-main/my_scripts/plot_heatmap_fourier_peaks_genes.R all_species_all_genes_positive_freq_mag.tsv all_species_all_genes_positive_freq_mag.pdf
 
 ####################################################################################################################################################################################################################################################################################################################
 #13. Identify proto-genes
