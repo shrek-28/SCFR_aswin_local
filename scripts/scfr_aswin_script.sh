@@ -478,7 +478,7 @@ pgdbyscfrs=$(awk '{print$3-$2}' SCFR_overlap_gene_deserts/human/human_0_only_int
 SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out
 ../genes/human/human_scfr_atleast_0_merged.bed
 
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a ../genes/human/human_scfr_atleast_0_merged.bed -b SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out -wo > test.bed
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a ../genes/human/human_scfr_atleast_0_merged.bed -b human_only_intergenic_gene_deserts.bed -wo > test.bed
 
 
 ####################################################################################################################################################################################################################################################################################################################
