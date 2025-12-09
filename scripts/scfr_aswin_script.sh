@@ -478,7 +478,7 @@ pgdbyscfrs=$(awk '{print$3-$2}' SCFR_overlap_gene_deserts/human/human_0_only_int
 SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out
 ../genes/human/human_scfr_atleast_0_merged.bed
 
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a ../genes/human/human_scfr_atleast_0_merged.bed -b human_only_intergenic_gene_deserts.bed -wo > test.bed
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a ../genes/$species/"$species"_scfr_atleast_0_merged.bed -b human_only_intergenic_gene_deserts.bed -wo > test.bed
 
 
 ####################################################################################################################################################################################################################################################################################################################
@@ -622,6 +622,73 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	#borangutan_5000_overlapping_scfrs_canonical_orf_unique.fa (985m37.837s), gibbon_5000_overlapping_scfrs_canonical_orf_unique.fa (49m0.796s), bonobo_5000_overlapping_scfrs_canonical_orf_unique.fa (150m23.588s)
 	#chimpanzee_5000_overlapping_scfrs_canonical_orf_unique.fa (102m24.520s), human_5000_overlapping_scfrs_canonical_orf_unique.fa (104m32.931s)
 
+
+#7.4.3. Identify proteins homologous to ORFs identified from SCFRs overlapping gene deserts
+
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for species in chimpanzee bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+#All unique hits & their data
+	cd gene_deserts/SCFR_overlap_gene_deserts/$species/SCFR_fasta/nr_blast/
+	for hit in $(awk -F "\t" 'NR>1{print$3}' "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6 | awk NF | sort | uniq)
+	do
+	awk -F "\t" -v a="$hit" '$3==a' "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6 | sed 's/ /_/g' > temp_hit
+	nh=$(wc -l temp_hit | awk '{print$1}')
+	ev=$(sort -k10,10g temp_hit | awk 'NR==1{print$10}')
+	qc=$(sort -k14,14nr temp_hit | awk 'NR==1{print$14}')
+	pi=$(sort -k15,15nr temp_hit | awk 'NR==1{print$15}')
+	echo $hit $nh $ev $qc $pi
+	unset nh ev qc pi
+	rm temp_hit
+	done | sed '1i Accession #_hits lowest_evalue highest_qcov highest_pid' | column -t > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits
+	#Top 5 hits per query
+	sed 's/ /_/g' "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6 | sort -k2,2V -k10,10g -k15,15nr -k14,14nr | awk 'a[$2]++<5' | awk '{print$3}' | grep -v "Subject" > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.top5_hits
+	#top 5 unique hits with lowest e-value
+	grep -v "lowest_evalue" "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits | sort -k3,3g | head -5 | awk '{print$1}' > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_top_5_eval
+	#top 5 unique hits with highest query coverage per hsp
+	grep -v "lowest_evalue" "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits | sort -k4,4nr | head -5 | awk '{print$1}' > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_top_5_qcov
+	#top 5 unique hits with highest percent identity
+	grep -v "lowest_evalue" "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits | sort -k5,5nr | head -5 | awk '{print$1}' > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_top_5_pid
+	#All unique XP ids
+	awk '$1~"XP_"' "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits | awk '{print$1}' > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_XP
+	cat "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_top_5_eval "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_top_5_qcov "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_top_5_pid "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits_XP "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.top5_hits | awk NF | sort | uniq > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list
+echo " - Total No of final hits:" $(wc -l "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list)
+unset hit 
+#Fetch metadata from NCBI
+	mkdir metadata
+	#XP accessions
+	for xp in $(awk -F "|" '/XP_/ {print$2}' "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list)
+	do
+	datasets summary gene accession "$xp" --report gene > metadata/"$xp"_gene.json
+	datasets summary gene accession ""$xp --report product > metadata/"$xp"_product.json
+	f1=$(cat metadata/"$xp"_product.json | json2xml | xtract -pattern reports -def "-" -element gene_id symbol taxname common_name description | sed 's/ /_/g')
+	f2=$(cat metadata/"$xp"_product.json | json2xml | xtract -pattern reports -sep "\n" -element genomic_accession_version | sort -u)
+	f3=$(cat metadata/"$xp"_product.json | json2xml | xtract -pattern transcripts -def "-" -element accession_version genomic_range/begin genomic_range/end  | grep "$xp" | awk '{print$(NF-1),$NF}')
+	f4=$(cat metadata/"$xp"_product.json | xtract -pattern protein -element accession_version length | grep $xp | awk '{print$2}')
+	f5=$(cat metadata/"$xp"_gene.json | json2xml | xtract -pattern gene_ontology -def "-" -sep "," -element biological_processes/name cellular_components/name molecular_functions/name | tr " " "_")
+	echo $xp $f1 $f2 $f3 $f4 $f5
+	unset f1 f2 f3 f4 f5
+	#rm a.json b.json
+	done | sed '1i Accession gene_id symbol taxname common_name description chr start end protein_length bio_proc cell_comp mol_fun' | column -t > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list_xp_summary
+#Non XP accessions
+	for nonxp in $(awk -F "|" '{if($2!~"XP_") print$2}' "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list)
+	do
+	esearch -db protein -query "$nonxp" | efetch -format all -mode xml > metadata/"$nonxp".json
+	#if [[ ! -s metadata/"$nonxp".json ]]; then esearch -db protein -query "$nonxp" | efetch -format all -mode xml > metadata/"$nonxp".json; else :; fi
+	f1=$(cat metadata/"$nonxp".json | xtract -pattern GBSeq -def "-" -element GBSeq_locus GBSeq_definition GBSeq_organism GBSeq_length | tr " " "_")
+	f2=$(cat metadata/"$nonxp".json | xtract -pattern GBSeq_references -def "-" -sep "\n" -element GBReference_position | uniq | tr " " "_")
+	f3=$(cat metadata/"$nonxp".json | xtract -pattern GBFeature -def "-" -element GBQualifier_value | grep CDD | awk -F "\t" '{print$2}' | sort | uniq -c | awk '{a = $1; $1=""; print $0,"("a")"}' | sed 's/^[ ]\+//g' | tr " " "_" | paste -s -d ",")
+	echo $nonxp $f1 $f2 $f3
+	unset f1 f2 f3
+	#rm d.json
+	done | sed '1i Accession Locus definition organism length location CDD' | column -t > "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list_nonxp_summary
+unset xp nonxp 
+cd /media/aswin/SCFR/SCFR-main
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #8. Fishers test
