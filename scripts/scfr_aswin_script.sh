@@ -996,7 +996,7 @@ do
 path=$(echo $fourier | awk -F "/" '!($NF="")' OFS="/")
 folder=$(echo $fourier | awk -F "/" '{print$NF}')
 cd $path
-python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder --top 3 --cores 3
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py $folder --top 3 --cores 32
 cd /media/aswin/SCFR/SCFR-main
 done
 done
