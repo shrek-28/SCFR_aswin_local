@@ -490,7 +490,7 @@ mkdir gene_deserts/SCFR_overlap_gene_deserts
 	unset o
 	done | sort -k1,1 -k2,2n | sed '1i Species Length_threshold overlapping_SCFR_count Min Max Mean Q1 median Q3' | column -t > gene_deserts/SCFR_overlap_gene_deserts/all_species_scfr_gene_deserts_overlap_summary
 
-#Plot overlap stats
+#Plot overlap length stats
 	cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts
 	for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 	do
@@ -506,7 +506,7 @@ mkdir gene_deserts/SCFR_overlap_gene_deserts
 	rm summary_"$species".tsv
 	done
 
-#Plot percentages
+#Plot percentage coverages
 	cd /media/aswin/SCFR/SCFR-main
 	for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 	do
@@ -554,12 +554,14 @@ do
 #Get canonical ORFs
 	ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa"
 #Get unique sequences
-	if [[ $species == "gorilla" || $species == "borangutan" || $species == "sorangutan" ]]; then it="0.80"; else it="0.90"; fi
+	if [[ $species == "gorilla" || $species == "borangutan" || $species == "sorangutan" ]]; then it="0.70"; else it="0.70"; fi
 	/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" $it
+	rm SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.log" 
 #Get non-canonical ORFs
 	ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 1 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa"
 #Get unique sequences
 	/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa" $it
+	rm SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.log"
 #Remove canonical ORFs from non-canonical ORFs
 	python3 /media/aswin/SCFR/SCFR-main/my_scripts/subtract_fasta.py SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique.fa" > SCFR_fasta/$species"_"$len"_overlapping_scfrs_non_canonical_orf_unique_filtered.fa"
 unset len scfr it
@@ -571,6 +573,19 @@ cd /media/aswin/SCFR/SCFR-main/
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#Summary: print number of overlaps & fasta & ORFs
+	cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts
+	for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+	do
+	i0=$(wc -l "$species"/"$species"_5000_only_intergenic_gene_deserts_overlaps.out | awk '{print$1}')
+	i1=$(grep ">" -c "$species"/SCFR_fasta/"$species"_5000_overlapping_scfrs.fa)
+	i2=$(grep ">" -c "$species"/SCFR_fasta/"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa)
+	i3=$(grep ">" -c "$species"/SCFR_fasta/"$species"_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa)
+	echo $species $i0 $i1 $i2 $i3 
+	unset i0 i1 i2 i3
+	done | sed '1i species #_scfr_gene_deserts_overlaps #_scfr_fasta #_can_ORFs #_non_can_ORFs' | tr " " "\t" > all_species_chosen_scfr_overlap_gene_deserts.tsv
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #7.4.2. Run nr blast locally
@@ -1125,10 +1140,19 @@ done
 
 #Run Fourier analysis in ORFs
 cd /media/aswin/SCFR/SCFR-main
+time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+echo ">" $species
+cd gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta
+#Run fourier
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/orf_parallel_fft_motif_report_grouped.py "$species"_5000_overlapping_scfrs_canonical_orf_unique.fa -t 32 -o output_"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/orf_parallel_fft_motif_report_grouped.py "$species"_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa -t 32 -o output_"$species"_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa
+#Get chromosomr-wise summary
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py output_"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa --top 3 --cores 32
+python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py output_"$species"_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa --top 3 --cores 32
+cd /media/aswin/SCFR/SCFR-main
+done
 
-cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts/sorangutan/SCFR_fasta
-human_5000_overlapping_scfrs_canonical_orf_unique.fa
-human_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
