@@ -456,20 +456,6 @@ cd /media/aswin/SCFR/SCFR-main
 	
 	mv desert_summary.tsv intergenic_region_summary.tsv gene_deserts/
 
-for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
-do
-gs=$(awk '{a+=$2} END{print a}' ../genome_sizes/"$species".genome)
-gds=$(bedtools merge -i "$species"_only_intergenic_gene_deserts.bed | awk '{print $3-$2}' | awk '{a+=$1} END{print a}')
-pgbygd=$(calc $gds / $gs | tr -d "~" | awk '{print$1*100}' | awk '{$NF+=0}1' CONVFMT="%.2f")
-
-scfrs=$(awk '{print$3-$2}' SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out | awk '{a+=$1} END{print a}')
-pgdbyscfrs=$(awk '{print$3-$2}' SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out | awk '{a+=$1} END{print a}')
-SCFR_overlap_gene_deserts/human/human_0_only_intergenic_gene_deserts_overlaps.out
-../genes/human/human_scfr_atleast_0_merged.bed
-
-/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a ../genes/$species/"$species"_scfr_atleast_0_merged.bed -b human_only_intergenic_gene_deserts.bed -wo > test.bed
-
-
 ####################################################################################################################################################################################################################################################################################################################
 #7.3. Identify SCFRs in gene deserts
 
@@ -512,16 +498,36 @@ mkdir gene_deserts/SCFR_overlap_gene_deserts
 	grep "$species" all_species_scfr_gene_deserts_overlap_summary | awk '!($1="")' | sed 's/^[ ]\+//g' | sed '1i Length_threshold N min max mean q1 median q3' | tr " " "\t" > summary_"$species".tsv
 	if  [[ "$species" == "human" ]]; then
 	Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
+	elif [[ "$species" == "gorilla" ]]; then
+	Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats_log_transformed.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
 	else
 	Rscript /media/aswin/SCFR/SCFR-main/my_scripts/Figure_2/plot_overlap_stats_extended.R summary_"$species".tsv "$species"_scfr_gene_deserts_overlap_stats.pdf $species
 	fi
 	rm summary_"$species".tsv
 	done
 
+#Plot percentages
+	cd /media/aswin/SCFR/SCFR-main
+	for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+	do
+	gs=$(awk '{a+=$2} END{print a}' genome_sizes/"$species".genome)
+	gds=$(bedtools merge -i gene_deserts/"$species"_only_intergenic_gene_deserts.bed | awk '{print $3-$2}' | awk '{a+=$1} END{print a}')
+	pgbygd=$(calc $gds / $gs | tr -d "~" | awk '{print$1*100}' | awk '{$NF+=0}1' CONVFMT="%.2f")
+	msp0=$(readlink -f genes/$species/"$species"_scfr_atleast_0_merged.bed)
+	msp5000=$(readlink -f genes/$species/"$species"_scfr_atleast_5000_merged.bed)
+	gdp=$(readlink -f gene_deserts/"$species"_only_intergenic_gene_deserts.bed)
+	ovl0=$(/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a $msp0 -b $gdp -wo | awk '{a+=$NF} END{print a}')
+	ovl5000=$(/media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a $msp5000 -b $gdp -wo | awk '{a+=$NF} END{print a}')
+	pgdbys0=$(calc $ovl0 / $gds | tr -d "~" | awk '{print$1*100}' | awk '{$NF+=0}1' CONVFMT="%.2f")
+	pgdbys5000=$(calc $ovl5000 / $gds | tr -d "~" | awk '{print$1*100}' | awk '{$NF+=0}1' CONVFMT="%.2f")
+	echo $species $gs $gds $ovl0 $ovl5000 $pgbygd $pgdbys0 $pgdbys5000
+	unset gs gds pgbygd msp0 msp5000 gdp ovl0 ovl5000 pgdbys0 pgdbys5000
+	done | sed '1i species genome_size gene_desert_size overlap_with_unfiltered_scfr overlap_with_5000_scfr percent_genome_by_gene_deserts percent_gene_deserts_by_unfiltered_scfr percent_gene_deserts_by_5000_scfr' | sed 's/ /\t/g' > gene_deserts/gene_deserts_percent_covered_summary.tsv
+
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #7.4. Identify proto-genes or gene-like regions within SCFRs overlapping gene deserts
 
-#7.4.1. Get fasta of overlapping SCFRs (12.1167 mins)
+#7.4.1. Get unique ORF fasta of overlapping SCFRs (12.1167 mins)
 
 cd /media/aswin/SCFR/SCFR-main/
 start_time=$(date +%s)
@@ -537,7 +543,7 @@ do
 	if [[ -s "$o" ]]; then
 	len=$(echo $o | awk -F "/" '{print$NF}' | cut -f2 -d "_")
 	#for each scfr
-	for scfr in $(awk '{print$4"::"$1":"$2"-"$3"("substr($4,1,1)")"}' $o)
+	for scfr in $(awk '{if($4~"-") print$4"::"$1":"$2"-"$3"("substr($4,1,1)")"; else print$4"::"$1":"$2"-"$3"(+)"}' $o)
 	do
 	chr=$(echo $scfr | cut -f3 -d ":")
 	name=$(echo $scfr | sed 's/^-/minus_/g' | cut -f1 -d "(" | tr ":-" "_" | sed 's/__/_/g')
@@ -566,6 +572,7 @@ done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #7.4.2. Run nr blast locally
 
 #Download nr blastdb
@@ -679,6 +686,9 @@ cd /media/aswin/SCFR/SCFR-main
 done
 end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #8. Fishers test
@@ -1112,6 +1122,13 @@ time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
   do
 grep -f <(awk '{if($4~"-") print$1,$2,$3,"frame_"$4; else print$1,$2,$3,"frame"$4}' OFS="_" gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps.out" | tr -d "-" | tr "." "_") <(awk '$1=="with_coding_region" && $2=="5000"' Fourier_analysis/$species/all_length_thresholds_fourier_summary) > gene_deserts/SCFR_overlap_gene_deserts/$species/$species"_5000_only_intergenic_gene_deserts_overlaps_fourier.out"
 done
+
+#Run Fourier analysis in ORFs
+cd /media/aswin/SCFR/SCFR-main
+
+cd /media/aswin/SCFR/SCFR-main/gene_deserts/SCFR_overlap_gene_deserts/sorangutan/SCFR_fasta
+human_5000_overlapping_scfrs_canonical_orf_unique.fa
+human_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
