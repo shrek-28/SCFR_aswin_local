@@ -587,13 +587,14 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	#time /media/aswin/programs/diamond makedb --in extracted_nr.fasta --db nr_diamond.dmnd --threads 32
 	#/media/aswin/programs/diamond makedb --in nr.fasta --db nr_tax_db.dmnd --taxon-map prot.accession2taxid.gz --taxon-nodes taxid.map --threads 32
 
-#2451.38 mins / 40.8564 hours / 1.70235 days
+#For 6 species: 2451.38 mins / 40.8564 hours / 1.70235 days
+#For gorilla: 2074.65 mins// 34.5775 hours / 1.44073 days
 
 #Run blastp
 cd /media/aswin/SCFR/SCFR-main/
 start_time=$(date +%s)
 #Don't use gorilla here
-for species in gorilla
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
 echo ">"$species
 cd gene_deserts/SCFR_overlap_gene_deserts/
@@ -627,7 +628,7 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 
 cd /media/aswin/SCFR/SCFR-main
 start_time=$(date +%s)
-for species in chimpanzee bonobo gibbon borangutan sorangutan
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
 do
 echo ">"$species
 #All unique hits & their data
