@@ -582,10 +582,9 @@ echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/6
 	i1=$(grep ">" -c "$species"/SCFR_fasta/"$species"_5000_overlapping_scfrs.fa)
 	i2=$(grep ">" -c "$species"/SCFR_fasta/"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa)
 	i3=$(grep ">" -c "$species"/SCFR_fasta/"$species"_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa)
-	echo $species $i0 $i1 $i2 $i3 
+	echo $species $i0 $i1 $i2 $i3 | awk '{print$0,$4+$5}'
 	unset i0 i1 i2 i3
-	done | sed '1i species #_scfr_gene_deserts_overlaps #_scfr_fasta #_can_ORFs #_non_can_ORFs' | tr " " "\t" > all_species_chosen_scfr_overlap_gene_deserts.tsv
-
+	done | sed '1i species #_scfr_gene_deserts_overlaps #_scfr_fasta #_canonical_ORFs #_non_canonical_ORFs Total_ORFs' | tr " " "\t" > all_species_chosen_scfr_overlap_gene_deserts.tsv
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #7.4.2. Run nr blast locally
@@ -1152,6 +1151,40 @@ python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summ
 python3 /media/aswin/SCFR/SCFR-main/my_scripts/scfr_fourier_chromosome_wise_summary.py output_"$species"_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa --top 3 --cores 32
 cd /media/aswin/SCFR/SCFR-main
 done
+
+#Summary
+cd /media/aswin/SCFR/SCFR-main
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+grep -v "Top_Peak_Count" gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta/output_"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa/chromosome_wise_summary/summary.tsv | sed "s/^/$species /g"
+done | sed '1i Species SCFR_Name Num_Raw_Peaks Top_Peak_Count Frequencies Magnitudes Periods' | tr " " "\t" > gene_deserts/SCFR_overlap_gene_deserts/all_species_5000_overlapping_scfrs_canonical_orf_unique_fourier.tsv
+
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+grep -v "Top_Peak_Count" gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta/output_"$species"_5000_overlapping_scfrs_non_canonical_orf_unique_filtered.fa/chromosome_wise_summary/summary.tsv | sed "s/^/$species /g"
+done | sed '1i Species SCFR_Name Num_Raw_Peaks Top_Peak_Count Frequencies Magnitudes Periods' | tr " " "\t" > gene_deserts/SCFR_overlap_gene_deserts/all_species_5000_overlapping_scfrs_non_canonical_orf_unique_filtered_fourier.tsv
+
+awk -F "\t" '$5~/0\.33/' gene_deserts/SCFR_overlap_gene_deserts/all_species_5000_overlapping_scfrs_canonical_orf_unique_fourier.tsv
+awk -F "\t" '$5~/0\.33/' gene_deserts/SCFR_overlap_gene_deserts/all_species_5000_overlapping_scfrs_non_canonical_orf_unique_filtered_fourier.tsv
+
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+all=$(wc -l gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta/nr_blast/"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits | awk '{print$1}')
+xp=$(awk '$1~"XP_"' gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta/nr_blast/"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits | wc -l | awk '{print$1}')
+echo $species $all $xp | awk '{print$0,($3/$2)*100}'
+#sort -k3,3g gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta/nr_blast/"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.all_hits | grep "XP_" --color=always -z
+unset all xp
+done | less -SNR
+
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan; do echo ">"$species; awk 'NR>1{print$6}' gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta/nr_blast/"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list_xp_summary | sort | uniq -c; done | less
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan; do echo ">"$species; awk 'NR>1{print$6}' gene_deserts/SCFR_overlap_gene_deserts/"$species"/SCFR_fasta/nr_blast/"$species"_5000_overlapping_scfrs_canonical_orf_unique.fa.outfmt6.final_list_xp_summary | awk NF | sed 's/uncharacterized_LOC.*/uncharacterized_LOC/g' | sort | uniq -c | sort -k1,1nr ; done | egrep ">|serine"
+trichohyalin-like
+keratin
+endochitinase_2
+
+plectin
+fap1
+dyneinq
 
 
 ####################################################################################################################################################################################################################################################################################################################
