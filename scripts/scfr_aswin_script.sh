@@ -554,7 +554,7 @@ do
 #Get canonical ORFs
 	ORFfinder -in SCFR_fasta/$species"_"$len"_overlapping_scfrs.fa" -n false -s 0 -ml 600 | myfasta -comb > SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa"
 #Get unique sequences
-	if [[ $species == "borangutan" || $species == "sorangutan" ]]; then it="0.60"; else it="0.70"; fi
+	if [[ $species == "borangutan" || $species == "sorangutan" ]]; then it="0.65"; else it="0.70"; fi
 	/media/aswin/SCFR/SCFR-main/my_scripts/cd_hit_find_unique_sequences.sh SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf.fa" SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.fa" $it
 	rm SCFR_fasta/$species"_"$len"_overlapping_scfrs_canonical_orf_unique.log" 
 #Get non-canonical ORFs
