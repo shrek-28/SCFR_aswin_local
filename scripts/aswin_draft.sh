@@ -5,6 +5,34 @@
 time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o output_sorangutan_5000_overlapping_scfrs_canonical_orf_unique.fa -t 32 sorangutan_5000_overlapping_scfrs_canonical_orf_unique.fa
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Run blastp in workstation
+cd ~/aswin/SCFR
+start_time=$(date +%s)
+#Don't use gorilla here
+for species in human chimpanzee gorilla bonobo gibbon borangutan sorangutan
+do
+echo ">"$species
+cd gene_deserts/SCFR_overlap_gene_deserts/
+mkdir -p $species/SCFR_fasta/nr_blast
+for path in $(find $species/SCFR_fasta -name "*_5000_overlapping_scfrs_canonical_orf_unique.fa" -type f)
+do
+can=$(echo $path)
+scfrcan=$(echo $can | awk -F "/" '{print$NF}')
+echo " - "$scfrcan
+#Run blast on canonical ORFs
+time /home/bbgs/anaconda3/pkgs/blast-2.16.0-h66d330f_4/bin/blastp -task blastp-fast -query $can -db /media/ashutosh/disk3/v5_nr_blastdb/nr -evalue 0.0001 -max_target_seqs 20 -max_hsps 1 -qcov_hsp_perc 70 -num_threads 64 \
+ -outfmt "6 stitle qseqid sseqid qlen length qstart qend sstart send evalue bitscore score qcovs qcovhsp pident nident mismatch gaps sstrand staxid ssciname scomname sblastname sskingdom" \
+ | sed '1i Subject_Title\tQuery\tSubject\tQuery_length\tAlignment_length\tQ_start\tQ_end\tS_start\tS_end\tE_value\tBit_score\tRaw_score\t%_Query_covered_per_sub\t%_Query_covered_per_hsp\t%_ident\tMatches\tMismatches\tGaps\tStrand\tsub_taxid\tsub_sciname\tsub_comname\tsub_blastname\tsub_skingdom\n' > $species/SCFR_fasta/nr_blast/$scfrcan".outfmt6"
+unset can scfrcan
+done
+cd ~/aswin/SCFR
+done
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #BLAST SCFR against nr database
 
 time /media/aswin/programs/diamond blastp \
