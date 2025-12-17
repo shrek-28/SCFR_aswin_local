@@ -1186,6 +1186,60 @@ plectin
 fap1
 dyneinq
 
+####################################################################################################################################################################################################################################################################################################################
+#Exon shadow
+
+#Find SCFR exon overlaps (113.083 mins)
+
+	mkdir /media/aswin/SCFR/SCFR-main/exon_shadow
+	cd /media/aswin/SCFR/SCFR-main
+	start_time=$(date +%s)
+	time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo ">"$species
+	mkdir exon_shadow/"$species"
+	cd exon_shadow/"$species"
+	gtf=$(find /media/aswin/SCFR/SCFR-main/genes/"$species" -name "GCF*.gtf")
+	scfr=$(find /media/aswin/SCFR/SCFR-main/SCFR_all -name "${species}_SCFR_all.out")
+	time python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/gff_to_coding_exons_bed.py -g $gtf -o "$species"_coding_exons.bed
+	time python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/scfr_exon_scan2.py "$species"_coding_exons.bed $scfr -p "$species"_results
+	unset gtf scfr
+	cd /media/aswin/SCFR/SCFR-main
+	done
+	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+	echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+#Summary of exons shadow
+	cd /media/aswin/SCFR/SCFR-main
+	time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	cd /media/aswin/SCFR/SCFR-main/exon_shadow/"$species"
+	#number of single exon overlaps
+	se=$(grep -v "#chrom" "$species"_results.single_exon.txt | wc -l)
+	#number of multi-exon overlaps
+	me=$(grep -v "#chrom" "$species"_results.multi_exon.txt | wc -l)
+	#number of existrons
+	ex=$(grep -v "#chrom" "$species"_results.exitron_candidates.txt | wc -l)
+	#single exon SCFR upstream length
+	su=$(awk 'NR>1{print$9}' "$species"_results.single_exon.txt | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	#single exon SCFR downstream length
+	sd=$(awk 'NR>1{print$10}' "$species"_results.single_exon.txt | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	#mutli exon SCFR upstream length
+	mu=$(awk 'NR>1{print$9}' "$species"_results.multi_exon.txt | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	#mutli exon SCFR downstream length
+	md=$(awk 'NR>1{print$10}' "$species"_results.multi_exon.txt | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	#number of exons in SCFRs
+	mn=$(awk 'NR>1{print$11}' "$species"_results.multi_exon.txt | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	#exitron
+	eg=$(awk 'NR>1{print$12}' "$species"_results.exitron_candidates.txt | ministat -n | tail -1 | sed 's/^x //g' | sed 's/[ ]\+/ /g' | sed 's/^[ ]\+//g')
+	echo $species $se $me $ex $su $sd $mu $md $mn $eg
+	unset se me ex su sd mu md mn eg
+	cd /media/aswin/SCFR/SCFR-main
+	done | sed '1i species #_single_exon #_multi_exon #_exitrons N-seu min-seu max-seu med-seu mean-seu sd-seu N-sed min-sed max-sed med-sed mean-sed sd-sed N-meu min-meu max-meu med-meu mean-meu sd-meu N-med min-med max-med med-med mean-med sd-med N-men min-men max-men med-men mean-men sd-men N-ex min-ex max-ex med-ex mean-ex sd-ex' | tr " " "\t" > exon_shadow/all_species_exon_shadow_length_summary.tsv
+	
+
+
+
 
 ####################################################################################################################################################################################################################################################################################################################
 ####################################################################################################################################################################################################################################################################################################################
