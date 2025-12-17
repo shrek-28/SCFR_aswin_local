@@ -1239,13 +1239,17 @@ dyneinq
 	cd /media/aswin/SCFR/SCFR-main
 	done | sed '1i species #_single_exon #_multi_exon #_exitrons N-seu min-seu max-seu med-seu mean-seu sd-seu N-sed min-sed max-sed med-sed mean-sed sd-sed N-meu min-meu max-meu med-meu mean-meu sd-meu N-med min-med max-med med-med mean-med sd-med N-men min-men max-men med-men mean-men sd-men N-ex min-ex max-ex med-ex mean-ex sd-ex' | tr " " "\t" > exon_shadow/all_species_exon_shadow_length_summary.tsv
 	
-while read e
+
+
+awk '{if($4~"-") print$1,$10,$11,$5"_exitron","1","-"; else print$1,$10,$11,$5"_exitron","1","+"}' OFS="\t" "$species"_results.exitron_candidates.txt | grep -v "#chrom" > "$species"_results.exitron_candidates.bed
+time while read e
 do
 e1=$(echo $e | awk '{print$1}')
 fa=$(find /media/aswin/SCFR/SCFR-main/chrs/$species/ -name "$e1*.fasta")
 /media/aswin/programs/bedtools2-2.31.1/bin/bedtools getfasta -fi "$fa" -bed <(echo "$e") -name+ -s | sed '/^>/ s/(-)/_minus/g' | sed '/^>/ s/(+)/_plus/g' | tr "-" "_"
 unset e1 fa
-done < <(head "$species"_results.exitron_candidates.bed) > "$species"__results.exitron_candidates.fa
+done < "$species"_results.exitron_candidates.bed > "$species"_results.exitron_candidates.fa
+
 
 
 
