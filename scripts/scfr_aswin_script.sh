@@ -1196,16 +1196,18 @@ dyneinq
 	start_time=$(date +%s)
 	time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
 	do
+	(
 	echo ">"$species
 	mkdir exon_shadow/"$species"
 	cd exon_shadow/"$species"
 	gtf=$(find /media/aswin/SCFR/SCFR-main/genes/"$species" -name "GCF*.gtf")
 	scfr=$(find /media/aswin/SCFR/SCFR-main/SCFR_all -name "${species}_SCFR_all.out")
-	time python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/gff_to_coding_exons_bed.py -g $gtf -o "$species"_coding_exons.bed
-	time python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/scfr_exon_scan2.py "$species"_coding_exons.bed $scfr -p "$species"_results
-	unset gtf scfr
+	python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/gff_to_coding_exons_bed.py -g $gtf -o "$species"_coding_exons.bed
+	python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/scfr_exon_scan2.py "$species"_coding_exons.bed $scfr -p "$species"_results
+	) &
 	cd /media/aswin/SCFR/SCFR-main
 	done
+	wait
 	end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
 	echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
 
@@ -1237,6 +1239,14 @@ dyneinq
 	cd /media/aswin/SCFR/SCFR-main
 	done | sed '1i species #_single_exon #_multi_exon #_exitrons N-seu min-seu max-seu med-seu mean-seu sd-seu N-sed min-sed max-sed med-sed mean-sed sd-sed N-meu min-meu max-meu med-meu mean-meu sd-meu N-med min-med max-med med-med mean-med sd-med N-men min-men max-men med-men mean-men sd-men N-ex min-ex max-ex med-ex mean-ex sd-ex' | tr " " "\t" > exon_shadow/all_species_exon_shadow_length_summary.tsv
 	
+while read e
+do
+e1=$(echo $e | awk '{print$1}')
+fa=$(find /media/aswin/SCFR/SCFR-main/chrs/$species/ -name "$e1*.fasta")
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools getfasta -fi "$fa" -bed <(echo "$e") -name+ -s | sed '/^>/ s/(-)/_minus/g' | sed '/^>/ s/(+)/_plus/g' | tr "-" "_"
+unset e1 fa
+done < <(head "$species"_results.exitron_candidates.bed) > "$species"__results.exitron_candidates.fa
+
 
 
 
