@@ -1261,8 +1261,12 @@ fa=$(find /media/aswin/SCFR/SCFR-main/chrs/$species/ -name "$e1*.fasta")
 unset e1 fa
 done < "$species"_results.exitron_candidates.bed > "$species"_results.exitron_candidates.fa
 
+awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' human_results.single_exon.txt ../human_results.single_exon.txt | nl
+awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' ../human_results.single_exon.txt human_results.single_exon.txt | nl
 
+https://www.ncbi.nlm.nih.gov/projects/sviewer/?id=NC_060929.1&tkey=DyVtCAAHCwIFDAEOKjseAjhwYm1Ffn5GUm1yWHvsVepD4VLy0QthY3k7ZyV9EQ4hfUU&assm_context=GCF_009914755.1&app_context=genome&mk=35086761:35086777|Shadow|red,35087777:35088032|SCFR|green,35087788:35087862|Shadow|993300,35086759:35086824|SCFR|blue&v=35086498:35087021&c=null&select=null&slim=0
 
+/media/aswin/programs/bedtools2-2.31.1/bin/bedtools getfasta -fi /media/aswin/SCFR/SCFR-main/chrs/human/NC_060929.1.fasta -bed <(echo -e "NC_060929.1\t35086758\t35086824\tSCFR\t1\t+") -name+ -s
 
 
 
