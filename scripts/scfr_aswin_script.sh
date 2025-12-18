@@ -1237,7 +1237,7 @@ dyneinq
 	echo $species $se $me $ex $su $sd $mu $md $mn $eg
 	unset se me ex su sd mu md mn eg
 	cd /media/aswin/SCFR/SCFR-main
-	done | sed '1i species #_single_exon #_multi_exon #_exitrons N-seu min-seu max-seu med-seu mean-seu sd-seu N-sed min-sed max-sed med-sed mean-sed sd-sed N-meu min-meu max-meu med-meu mean-meu sd-meu N-med min-med max-med med-med mean-med sd-med N-men min-men max-men med-men mean-men sd-men N-ex min-ex max-ex med-ex mean-ex sd-ex' | tr " " "\t" > exon_shadow/all_species_exon_shadow_length_summary.tsv
+	done | sed '1i species single_exon_scfr_count multi_exon_scfr_count exitron_count N-seu min-seu max-seu med-seu mean-seu sd-seu N-sed min-sed max-sed med-sed mean-sed sd-sed N-meu min-meu max-meu med-meu mean-meu sd-meu N-med min-med max-med med-med mean-med sd-med N-men min-men max-men med-men mean-men sd-men N-ex min-ex max-ex med-ex mean-ex sd-ex' | tr " " "\t" > exon_shadow/all_species_exon_shadow_length_summary.tsv
 	
 
 
