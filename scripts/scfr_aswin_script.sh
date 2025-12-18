@@ -1238,7 +1238,18 @@ dyneinq
 	unset se me ex su sd mu md mn eg
 	cd /media/aswin/SCFR/SCFR-main
 	done | sed '1i species single_exon_scfr_count multi_exon_scfr_count exitron_count N-seu min-seu max-seu med-seu mean-seu sd-seu N-sed min-sed max-sed med-sed mean-sed sd-sed N-meu min-meu max-meu med-meu mean-meu sd-meu N-med min-med max-med med-med mean-med sd-med N-men min-men max-men med-men mean-men sd-men N-ex min-ex max-ex med-ex mean-ex sd-ex' | tr " " "\t" > exon_shadow/all_species_exon_shadow_length_summary.tsv
-	
+
+#plot SCFR positional exon shadow (1m47.891s)
+	cd /media/aswin/SCFR/SCFR-main
+	time for species in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+	do
+	echo ">"$species
+	cd /media/aswin/SCFR/SCFR-main/exon_shadow/"$species"
+	python3 /media/aswin/SCFR/SCFR-main/my_scripts/Figure_3/positional_exon_shadow_in_scfr.py -i "$species"_results.single_exon.txt -t "$species"_positional_single_exon_shadow_in_scfr.csv -p "$species"_positional_single_exon_shadow_in_scfr.pdf -b 20
+	python3 /media/aswin/SCFR/SCFR-main/my_scripts/Figure_3/positional_exon_shadow_in_scfr.py -i "$species"_results.multi_exon.txt -t "$species"_positional_multiple_exon_shadow_in_scfr.csv -p "$species"_positional_multiple_exon_shadow_in_scfr.pdf -b 20
+	cd /media/aswin/SCFR/SCFR-main
+	done
+
 
 
 awk '{if($4~"-") print$1,$10,$11,$5"_exitron","1","-"; else print$1,$10,$11,$5"_exitron","1","+"}' OFS="\t" "$species"_results.exitron_candidates.txt | grep -v "#chrom" > "$species"_results.exitron_candidates.bed
