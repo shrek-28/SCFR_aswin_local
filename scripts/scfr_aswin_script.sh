@@ -1203,6 +1203,7 @@ dyneinq
 	gtf=$(find /media/aswin/SCFR/SCFR-main/genes/"$species" -name "GCF*.gtf")
 	scfr=$(find /media/aswin/SCFR/SCFR-main/SCFR_all -name "${species}_SCFR_all.out")
 	python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/gff_to_coding_exons_bed.py -g $gtf -o "$species"_coding_exons.bed
+	#Find exons & introns that falls inside SCFRs: script defines SCFR containment as strictly inside, not boundary-inclusive (eg: an exon starting exactly at SCFR_end is excluded.)
 	python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/scfr_exon_scan2.py "$species"_coding_exons.bed $scfr -p "$species"_results
 	) &
 	cd /media/aswin/SCFR/SCFR-main
@@ -1261,8 +1262,13 @@ fa=$(find /media/aswin/SCFR/SCFR-main/chrs/$species/ -name "$e1*.fasta")
 unset e1 fa
 done < "$species"_results.exitron_candidates.bed > "$species"_results.exitron_candidates.fa
 
-awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' human_results.single_exon.txt ../human_results.single_exon.txt | nl
-awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' ../human_results.single_exon.txt human_results.single_exon.txt | nl
+awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' human_results.single_exon.txt ../human_results.single_exon.txt | awk '{print$0,$3-$2,$6-$5}' | colnum.sh
+awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' ../human_results.single_exon.txt human_results.single_exon.txt | awk '{print$0,$3-$2,$6-$5}' | colnum.sh
+
+grep TTC23L human_results.multi_exon.txt | grep XM_054351831.1 | less
+
+#Examples of errors on old exon shadow script:
+#1. KLHL17 genes: 1 bp exon is overlapping with SCFR, but reported in new code, this exon is last exon hence if included stop codon then 
 
 https://www.ncbi.nlm.nih.gov/projects/sviewer/?id=NC_060929.1&tkey=DyVtCAAHCwIFDAEOKjseAjhwYm1Ffn5GUm1yWHvsVepD4VLy0QthY3k7ZyV9EQ4hfUU&assm_context=GCF_009914755.1&app_context=genome&mk=35086761:35086777|Shadow|red,35087777:35088032|SCFR|green,35087788:35087862|Shadow|993300,35086759:35086824|SCFR|blue&v=35086498:35087021&c=null&select=null&slim=0
 
