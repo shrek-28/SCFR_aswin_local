@@ -1,6 +1,60 @@
 #############################################################################################################################################################################################################################################################################################################
 #DRAFT SCRIPTS
 #############################################################################################################################################################################################################################################################################################################
+##xon shadow
+
+cd /media/aswin/SCFR/SCFR-main/exon_shadow/human/updated
+time python3 gtf_to_cds_with_transcript_exon_metadata.py -i /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf -o human_coding_exons.bed
+
+time python3 exon_shadow_and_exitrons_2.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test
+
+time python3 exon_shadow_and_exitrons_3.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test3
+exon_shadow_and_exitrons_3.py
+awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' test3.single_exon.txt ../human_results.single_exon.txt | awk '{print$0,$3-$2,$6-$5}' | colnum.sh
+awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' ../human_results.single_exon.txt test3.single_exon.txt | awk '{print$0,$3-$2,$6-$5}' | colnum.sh
+
+time python3 exon_shadow_and_exitrons_4.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test4
+
+time python3 exon_shadow_and_exitrons_5.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test5
+
+time python3 exon_shadow_and_exitrons_6.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test6
+
+time python3 exon_shadow_and_exitrons_7.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test7
+
+time python3 exon_shadow_and_exitrons_8.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test8
+
+time python3 exon_shadow_and_exitrons_9.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test9
+
+
+Update the code for these examples: 
+
+1. When mapping exons into SCFRs, in `find_exons_in_scfr` consider exons with same boundary as SCFRs as well, not only exons lying completely inside SCFR, e.g:
+SCFR:
+NC_060926.1	119800875	119801067	1
+exon:
+NC_060926.1	119800941	119801066	DBI	NM_001178041.4	1	2	12	1	middle	0.083	unique
+
+2. After finding exons in scfr, classify them to multi only when more than one non-overlapping exons fall inside or share boundary with same scfr, e.g. this are overlapping exons:
+scfr:
+NC_060929.1	35086758	35086824	1
+exon:
+NC_060929.1	35086758	35086777	TTC23L	NM_001386171.1	1	1	19	4	first	0.211	alternative
+NC_060929.1	35086758	35086777	TTC23L	XM_054351825.1	1	1	19	4	first	0.211	alternative
+NC_060929.1	35086758	35086777	TTC23L	NM_001317949.2	1	1	19	4	first	0.211	alternative
+NC_060929.1	35086762	35086777	TTC23L	XM_054351831.1	1	1	19	1	first	0.053	unique
+NC_060929.1	35086758	35086777	TTC23L	XM_054351833.1	1	1	19	4	first	0.211	alternative
+
+3. Don't skip exons with length one base pair, e.g.:
+e.g. 
+scfr:
+NC_060925.1	392806	393139	2
+exon:
+NC_060925.1	392897	392957	KLHL17	XM_054336255.1	3	9	7	1	middle	0.143	unique
+NC_060925.1	393139	393139	KLHL17	XM_054336255.1	2	10	7	1	last	0.143	unique
+
+
+
+#############################################################################################################################################################################################################################################################################################################
 
 time python3 /media/aswin/SCFR/SCFR-main/Fourier_analysis/scfr_parallel_fft_motif_report_grouped.py -o output_sorangutan_5000_overlapping_scfrs_canonical_orf_unique.fa -t 32 sorangutan_5000_overlapping_scfrs_canonical_orf_unique.fa
 
