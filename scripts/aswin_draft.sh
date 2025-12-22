@@ -14,17 +14,19 @@ awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' test3.single_exon.txt ../hu
 awk 'NR==FNR {a[$1,$2,$3]; next} !(($1,$2,$3) in a)' ../human_results.single_exon.txt test3.single_exon.txt | awk '{print$0,$3-$2,$6-$5}' | colnum.sh
 
 time python3 exon_shadow_and_exitrons_4.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test4
-
 time python3 exon_shadow_and_exitrons_5.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test5
-
 time python3 exon_shadow_and_exitrons_6.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test6
-
 time python3 exon_shadow_and_exitrons_7.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test7
-
 time python3 exon_shadow_and_exitrons_8.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test8
-
 time python3 exon_shadow_and_exitrons_9.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test9
+time python3 exon_shadow_and_exitrons_14.py human_coding_exons.bed /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -p test14
 
+awk 'NR>1{if($4~"-") print$1,$2,$3,"SCFR_"++i,"1","-"; else print$1,$2,$3,"SCFR_"++i,"1","+"}' OFS="\t" test14.multi_exon.txt > test14.multi_exon_scfrs.bed
+awk '$4=="MUC4" || $4=="COL7A1" || $4=="SKOR1" || $4=="KLHL17"' human_coding_exons.bed > mini.bed
+time /media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a mini.bed -b /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -wo -s > mini_overlap.out
+
+grep COL7A1 test10* -c
+grep COL7A1 test14* -c
 
 Update the code for these examples: 
 
