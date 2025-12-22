@@ -25,6 +25,15 @@ awk 'NR>1{if($4~"-") print$1,$2,$3,"SCFR_"++i,"1","-"; else print$1,$2,$3,"SCFR_
 awk '$4=="MUC4" || $4=="COL7A1" || $4=="SKOR1" || $4=="KLHL17"' human_coding_exons.bed > mini.bed
 time /media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a mini.bed -b /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -wo -s > mini_overlap.out
 
+time /media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -b human_coding_exons.bed -wo > all_human_a_scfr_b_cds.bed
+time /media/aswin/programs/bedtools2-2.31.1/bin/bedtools intersect -a human_coding_exons.bed -b /media/aswin/SCFR/SCFR-main/SCFR_all/human_SCFR_all.out -wo > all_human_a_cds_b_scfr.bed
+
+grep "COL7A1" test14.single_exon.txt | awk 'NR>1{if($4~"-") print$1,$2,$3,"SCFR_"++i,"1","-"; else print$1,$2,$3,"SCFR_"++i,"1","+"}' OFS="\t" > COL7A1_test14.single_exon.bed
+grep "COL7A1" test14.multi_exon.txt | awk 'NR>1{if($4~"-") print$1,$2,$3,"SCFR_"++i,"1","-"; else print$1,$2,$3,"SCFR_"++i,"1","+"}' OFS="\t" > COL7A1_test14.multi_exon.bed
+grep "COL7A1" test14.composite_exon.txt | awk 'NR>1{if($4~"-") print$1,$2,$3,"SCFR_"++i,"1","-"; else print$1,$2,$3,"SCFR_"++i,"1","+"}' OFS="\t" > COL7A1_test14.composite_exon.bed
+
+
+
 grep COL7A1 test10* -c
 grep COL7A1 test14* -c
 
