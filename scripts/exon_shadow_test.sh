@@ -46,6 +46,9 @@ done < <(awk '{print$1,$2,$3,$4,$5,$6}' human_scfr_cds_all_overlaps.bed | sort -
 scfr=`grep KLHL17 human_scfr_cds_all_overlaps.bed | grep  392806 | grep  393139 | grep XM_054336255.1 | grep last`
 scfr=`grep BRCA1 human_scfr_cds_all_overlaps.bed | grep  43926117 | grep 43926252`
 scfr=`grep TTC23L human_scfr_cds_all_overlaps.bed | grep  35087777 | grep 35088032 | awk '{print$1,$2,$3,$4,$5,$6}' OFS="\t" | sort -u`
+scfr=$(grep DBI human_scfr_cds_all_overlaps.bed | grep 119801067 | awk '{print$1,$2,$3,$4,$5,$6}' OFS="\t" | sort -u)
+
+
 
 scfr=`grep KLHL17 human_scfr_cds_all_overlaps.bed | grep 393139 | grep 392806 | grep XM_054336255.1 | grep 392897`
 
