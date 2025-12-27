@@ -89,12 +89,14 @@ cat temp.bed | awk '{if($6~"-") print$0,$3-$9,$8-$2; else print$0,$8-$2,$3-$9}' 
 
 #####
 
+head -n 1000 human_scfr_containing_cds.bed | awk 'BEGIN{FS="\t"; OFS="\t"} {print$1,$2,$3,$4,$5,$6}' | awk -v a="$cs" '{if($6=="+") print$0,$2-($2-($2%3))+1; else if($6=="-") print$0,"-"(((a-$3+1)-((a-$3+1)-((a-$3+1)%3))+2)%3)+1}' | awk '{if($4==$7) print$0,"same"; else print$0,"diff"}' | less
+
 #correct
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep APOBEC1 | grep 7667091 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,"-"(((a-$5+1)-((a-$5+1)-((a-$5+1)%3))+2)%3)+1+$8}'
 #correct
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep APOBEC1 | grep 7667091 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
 #incorrect
-awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w CHD4 | grep 6612859 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,"-"(((a-$5+1)-((a-$5+1)-((a-$5+1)%3))+2)%3)+1+$8}'
+#awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w CHD4 | grep 6612859 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,"-"(((a-$5+1)-((a-$5+1)-((a-$5+1)%3))+2)%3)+1+$8}'
 #correct
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w CHD4 | grep 6612859 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
 #correct
@@ -102,7 +104,7 @@ awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM1
 #correct
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w TNFRSF1A | grep 6339687 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,"-"(((a-$5+1)-((a-$5+1)-((a-$5+1)%3))+2)%3)+1+$8}'
 #incorrect
-awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w TNFRSF1A | grep 6339687 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,"-"(a-$5+1)-(a-$5+1)-((a-$5+1)%3)+$8}'
+#awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w TNFRSF1A | grep 6339687 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,"-"(a-$5+1)-(a-$5+1)-((a-$5+1)%3)+$8}'
 #correct
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w TNFRSF1A | grep 6339687 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
 #correct
@@ -117,13 +119,32 @@ awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM1
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep KDM5D | grep 20642300 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
 
 #Plus strand
-#correct
+#correct m1
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep SAMD11 | grep 369889 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
-#
-awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep SAMD11 | grep 369889 | awk -v a="$cs" '{if($7=="+") print$0,$4+$8-(($4+$8)-(($4+$8)%3)); else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
-#correct
-awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | tail -n 1000 | grep 22396565 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1-$8; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
-#correct
+#incorrect m2
+#awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep SAMD11 | grep 369889 | awk -v a="$cs" '{if($7=="+") print$0,$4+$8-(($4+$8)-(($4+$8)%3)); else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
+#incorrect m3
+#awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep SAMD11 | grep 369889 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1-$8; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
+#incorrect m1
+#awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | tail -n 1000 | grep 22396565 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
+#correct m2
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | tail -n 1000 | grep 22396565 | awk -v a="$cs" '{if($7=="+") print$0,$4+$8-(($4+$8)-(($4+$8)%3)); else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
+#correct m3
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | tail -n 1000 | grep 22396565 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+1-$8; else if($7=="-") print$0,(a-$5+1)-(a-$5+1)-((a-$5+1)%3)-$8}'
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep USP9Y | grep 13644275 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}'
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep USP9Y | grep 13644688 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}'
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep CD99 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | grep 2391385 
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep CD99 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | grep 2394572
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep CD99 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | egrep "2415161|2415158"
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep KIF2C | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | grep 30203
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w CYP4X1 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | grep 10644
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w PRKAA2 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | grep 70249
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w CACHD1 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))}' | grep 10710
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w DAP3 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | grep 64255
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | grep -w ATP1A4 | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | grep 08333
 
 
+
+
+#All bed entries
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))}' | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | awk '{print$1,$4,$5,$10,$12,$7,$8,$(NF-1),$NF}' | less -S
