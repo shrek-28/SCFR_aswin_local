@@ -148,3 +148,4 @@ awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM1
 
 #All bed entries
 awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))}' | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | awk '{print$1,$4,$5,$10,$12,$7,$8,$(NF-1),$NF}' | less -S
+awk '$3=="CDS"' /media/aswin/SCFR/SCFR-main/genes/human/GCF_009914755.1_T2T-CHM13v2.0_genomic.gtf | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))}' | awk -v a="$cs" '{if($7=="+") print$0,$4-($4-($4%3))+$8}' | awk '{print$1,$4,$5,$10,$12,$7,$8,$(NF-1),$NF}' | sort -k7,7n -k8,8n -k9,9n | less
