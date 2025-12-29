@@ -22,8 +22,10 @@ echo "chr start end frame filler strand chr first_exon_start last_exon_end gene 
 time while read scfr
 do
 grep "$scfr" "$species"_scfr_containing_cds.bed > scfr_temp.bed
+#strand
+strand=$(awk -F "\t" '{print$6}' scfr_temp.bed | sort -u)
 #Total number of exons
-tnoe=$(wc -l scfr_temp.bed | awk '{print$1}')
+tnoe=$(wc -l < scfr_temp.bed)
 #Number of overlapping exons
 mc=$(awk '{print$7,$8,$9,$10,$11,$12}' OFS="\t" scfr_temp.bed | bedtools sort -i - | bedtools merge -i - -s -c 5 -o count | wc -l)
 #Classify exon shadow
@@ -37,22 +39,24 @@ then
 #save multi-exon containing SCFRs (multiple exons per SCFR or single transcript per SCFR)
 for ut in $(awk '{print$11}' scfr_temp.bed | sort -u)
 do
+awk -v ut="$ut" '$11==ut' scfr_temp.bed | sort -k8,8n -k9,9n > temp_multi_sorted
 #plus strand
-if [[ $(grep "$ut" scfr_temp.bed | awk -F "\t" '{print$6}' | sort -u) == "+" ]]
+if [[ $strand == "+" ]]
 then
-e1=$(awk -v ut="$ut" '$11==ut' scfr_temp.bed | sort -k8,8n -k9,9n | head -1 | awk '{print$1,$2,$3,$4,$5,$6,$7,$8,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21}')
-e2=$(awk -v ut="$ut" '$11==ut' scfr_temp.bed | sort -k8,8n -k9,9n | tail -1 | awk '{print$9,$14,$16,$17,$18,$19,$20,$22}')
-ec=$(awk -v ut="$ut" '$11==ut' scfr_temp.bed | wc -l)
+e1=$(head -1 temp_multi_sorted | awk '{print$1,$2,$3,$4,$5,$6,$7,$8,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21}')
+e2=$(tail -1 temp_multi_sorted| awk '{print$9,$14,$16,$17,$18,$19,$20,$22}')
+ec=$(wc -l < temp_multi_sorted)
 paste <(echo "$e1") <(echo "$e2") | awk -v ec="$ec" '{print$1,$2,$3,$4,$5,$6,$7,$8,$21,$9,$10,$11,$12,ec,$20,$28,$13,$22,$14,$15,$23,$16,$24,$17,$25,$18,$26,$19,$27}'
 #minus strand
-elif [[ $(grep "$ut" scfr_temp.bed | awk -F "\t" '{print$6}' | sort -u) == "-" ]]
+elif [[ $strand == "-" ]]
 then
-e1=$(awk -v ut="$ut" '$11==ut' scfr_temp.bed | sort -k8,8n -k9,9n | head -1 | awk '{print$1,$2,$3,$4,$5,$6,$7,$8,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$22}')
-e2=$(awk -v ut="$ut" '$11==ut' scfr_temp.bed | sort -k8,8n -k9,9n | tail -1 | awk '{print$9,$14,$16,$17,$18,$19,$20,$21}')
-ec=$(awk -v ut="$ut" '$11==ut' scfr_temp.bed | wc -l)
+e1=$(head -1 temp_multi_sorted | awk '{print$1,$2,$3,$4,$5,$6,$7,$8,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$22}')
+e2=$(tail -1 temp_multi_sorted | awk '{print$9,$14,$16,$17,$18,$19,$20,$21}')
+ec=$(wc -l < temp_multi_sorted)
 paste <(echo "$e1") <(echo "$e2") | awk -v ec="$ec" '{print$1,$2,$3,$4,$5,$6,$7,$8,$21,$9,$10,$11,$12,ec,$28,$20,$22,$13,$14,$23,$15,$24,$16,$25,$17,$26,$18,$27,$19}'
 else :
 fi
+rm temp_multi_sorted
 unset e1 e2 ec
 #Filter transcripts with identical exons, keep only one
 done | awk '!seen[$7,$8,$9,$10,$12,$13,$15,$16,$22,$23,$26,$27,$28,$29]++' | tr " " "\t" >> "$species"_multi_exon.tsv
