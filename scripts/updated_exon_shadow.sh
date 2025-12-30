@@ -8,14 +8,14 @@ cd exon_shadow/"$species"
 
 #Prepare inputs:
   #get zero based scfr bed file
-  time awk '{if($4~"-") print$0,"1","-"; else print$0,"1","+"}' OFS="\t" /media/aswin/SCFR/SCFR-main/SCFR_all/"$species"_SCFR_all.out > "$species"_scfr_all.bed
+  awk '{if($4~"-") print$0,"1","-"; else print$0,"1","+"}' OFS="\t" /media/aswin/SCFR/SCFR-main/SCFR_all/"$species"_SCFR_all.out > "$species"_scfr_all.bed
   #Convert gtf to zero based cds bed (headers: chrom start end gene tx strand frame exon_number gene_tx_count exon_tx_count exon_order sharing splicing)
   gtf=$(find /media/aswin/SCFR/SCFR-main/genes/"$species" -name "GCF*.gtf")
-  time python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/gtf_to_cds_with_transcript_exon_metadata.py -i $gtf -s "$species" -o "$species"_coding_exons.bed
+  python3 /media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/gtf_to_cds_with_transcript_exon_metadata.py -i $gtf -s "$species" -o "$species"_coding_exons.bed
   #get SCFR exon overlaps (headers: chrom start end frame filler strand chrom start end gene tx strand frame exon_number gene_tx_count exon_tx_count exon_order sharing splicing)
-  time bedtools intersect -a "$species"_scfr_all.bed -b "$species"_coding_exons.bed -wo -s > "$species"_scfr_cds_all_overlaps.bed
+  bedtools intersect -a "$species"_scfr_all.bed -b "$species"_coding_exons.bed -wo -s > "$species"_scfr_cds_all_overlaps.bed
   #get scfrs containing exons with same frame as exons & calculate their upstream & downstream shadow
-  time awk '{c4=$4; gsub("-","",c4); if(c4==$13 && $2<=$8 && $3>=$9) {if($6=="+") print$0,$8-$2,$3-$9; else if($6=="-") print$0,$3-$9,$8-$2}}' "$species"_scfr_cds_all_overlaps.bed > "$species"_scfr_containing_cds.bed
+  awk '{c4=$4; gsub("-","",c4); if(c4==$13 && $2<=$8 && $3>=$9) {if($6=="+") print$0,$8-$2,$3-$9; else if($6=="-") print$0,$3-$9,$8-$2}}' "$species"_scfr_cds_all_overlaps.bed > "$species"_scfr_containing_cds.bed
 
 #filter & classiffy exon-scfr overlaps & calculate exon shadow
 #create output files
