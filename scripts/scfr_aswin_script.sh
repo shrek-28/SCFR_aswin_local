@@ -1189,6 +1189,21 @@ dyneinq
 ####################################################################################################################################################################################################################################################################################################################
 #Exon shadow
 
+mkdir /media/aswin/SCFR/SCFR-main/exon_shadow
+cd /media/aswin/SCFR/SCFR-main
+start_time=$(date +%s)
+for sp in human bonobo chimpanzee gorilla borangutan sorangutan gibbon
+do
+(
+echo ">"$sp
+/media/aswin/SCFR/SCFR-main/my_scripts/exon_shadow/species_wise_exon_shadow_exitron_shell_script.sh $sp
+) &
+done
+wait
+end_time=$(date +%s) && elapsed_time=$((end_time - start_time))
+echo -e "\n Total time taken:" && echo $elapsed_time | awk '{print"-days:",$NF/60/60/24,"\n","-hours:",$NF/60/60,"\n","-mins:",$NF/60,"\n","-secs:",$1}' | column -t | sed 's/^/   /g' && echo -e
+
+
 #Find SCFR exon overlaps (113.083 mins)
 
 	mkdir /media/aswin/SCFR/SCFR-main/exon_shadow
