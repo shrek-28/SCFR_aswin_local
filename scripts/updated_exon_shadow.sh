@@ -27,7 +27,7 @@ time while read scfr
 do
 grep "$scfr" "$species"_scfr_containing_cds.bed > scfr_temp.bed
 #strand
-strand=$(awk -F "\t" '{print$6}' scfr_temp.bed | sort -u)
+strand=$(awk 'NR==1{print $6; exit}' scfr_temp.bed)
 #Total number of exons
 tnoe=$(wc -l < scfr_temp.bed)
 #Number of overlapping exons
