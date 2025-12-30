@@ -19,9 +19,9 @@ cd exon_shadow/"$species"
 
 #filter & classiffy exon-scfr overlaps & calculate exon shadow
 #create output files
-  echo "chr start end frame filler strand chr exon_start exon_end gene transcript exon_strand exon_frame exon_number gene_tx_count exon_tx_count exon_order exon_sharing exon_splicing overlap_len upstream_len_in_scfr downstream_len_in_scfr merged_tx" | tr " " "\t" > "$species"_single_exon.tsv
-  echo "chr start end frame filler strand chr first_exon_start last_exon_end gene transcript exon_strand exon_frame exon_count upstream_len_in_scfr downstream_len_in_scfr first_exon_number last_exon_number gene_tx_count first_exon_tx_count last_exon_tx_count first_exon_order last_exon_order first_exon_sharing last_exon_sharing first_exon_splicing last_exon_splicing first_exon_overlap last_exon_overlap merged_tx" | tr " " "\t" > "$species"_multi_exon.tsv
-
+  echo "chr start end frame filler strand chr exon_start exon_end gene transcript exon_strand exon_frame exon_number gene_tx_count exon_tx_count exon_order exon_sharing exon_splicing overlap_len upstream_len_in_scfr downstream_len_in_scfr merged_txs" | tr " " "\t" > "$species"_single_exon.tsv
+  echo "chr start end frame filler strand chr first_exon_start last_exon_end gene transcript exon_strand exon_frame exon_count upstream_len_in_scfr downstream_len_in_scfr first_exon_number last_exon_number gene_tx_count first_exon_tx_count last_exon_tx_count first_exon_order last_exon_order first_exon_sharing last_exon_sharing first_exon_splicing last_exon_splicing first_exon_overlap last_exon_overlap merged_txs" | tr " " "\t" > "$species"_multi_exon.tsv
+  echo "chr start end frame filler frame chr exon_1_start exon_1_end exon_2_start exon_2_end gene transcript exon_strand exon_frame intron_start intron_end intron_length merged_txs" | tr " " "\t" > "$species"_exitron_candidates.tsv
 #Loop over each unique SCFRs to calculate exon shadow
 time while read scfr
 do
@@ -68,7 +68,6 @@ mc=$(awk '{print$7,$8,$9,$10,$11,$12}' OFS="\t" scfr_temp.bed | bedtools sort -i
   done | awk '{ key=$7 FS $8 FS $9 FS $10 FS $12 FS $13 FS $15 FS $16 FS $22 FS $23 FS $26 FS $27 FS $28 FS $29; c[key]++; if(!(key in f)){f[key]=$0;o[++n]=key} } END{for(i=1;i<=n;i++) print f[o[i]],c[o[i]]}' | tr " " "\t" >> "$species"_multi_exon.tsv
 
 #exitron calculation
-  echo "chr start end frame filler frame chr exon_1_start exon_1_end exon_2_start exon_2_end gene transcript exon_strand exon_frame intron_start intron_end intron_length merged_tx" | tr " " "\t" > "$species"_exitron_candidates.tsv
   unset ut
   for ut in $(awk '{print$11}' scfr_temp.bed | sort -u)
   do
